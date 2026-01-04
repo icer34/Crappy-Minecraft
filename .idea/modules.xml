@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/crappy_minecraft.iml" filepath="$PROJECT_DIR$/crappy_minecraft.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Windows/Windows.iml" filepath="$PROJECT_DIR$/Windows/Windows.iml" />
+      <module fileurl="file://$PROJECT_DIR$/core/core.iml" filepath="$PROJECT_DIR$/core/core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/macOS/macOS.iml" filepath="$PROJECT_DIR$/macOS/macOS.iml" />
     </modules>
   </component>
 </project>
