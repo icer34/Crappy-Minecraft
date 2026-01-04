@@ -1,6 +1,11 @@
+package core;
+
 import game.Game;
 
-void main() {
-    Game game = new Game();
-    game.run();
+public class Main {
+
+    void main() {
+        Game game = new Game();
+        game.run();
+    }
 }

@@ -1,0 +1,37 @@
+<component name="libraryTable">
+  <library name="common">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/libs/common/fastutil-8.5.13.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-binding-1.90.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-lwjgl3-1.90.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-1.10.8.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-primitives-1.10.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-assimp.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-glfw.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-openal.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-opengl.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-stb.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjglx-debug-1.0.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-binding-1.90.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-lwjgl3-1.90.0-javadoc.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-primitives-1.10.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-binding-1.90.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/imgui-lwjgl3-1.90.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-1.10.8-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-1.10.8-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/joml-primitives-1.10.0-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-assimp-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-glfw-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-openal-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-opengl-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjgl-stb-sources.jar!/" />
+      <root url="jar://$PROJECT_DIR$/libs/common/lwjglx-debug-1.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
