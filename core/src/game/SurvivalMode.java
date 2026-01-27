@@ -50,15 +50,13 @@ public class SurvivalMode implements GameMode{
     }
 
     private void processPlayerActions(Player player, Input input, RayCastResult rayCastResult) {
-        if(!rayCastResult.hit()) return;
-
         // --- PLAYER BROKE BLOCK ---
-        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1)) {
+        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1) && rayCastResult.hit()) {
             world.breakBlock(rayCastResult.targetPos());
         }
 
         // --- PLAYER PLACED BLOCK ---
-        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_2)) {
+        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_2) && rayCastResult.hit()) {
 
             Vector3i targetPos = rayCastResult.targetPos();
             targetPos.add(rayCastResult.targetNorm());

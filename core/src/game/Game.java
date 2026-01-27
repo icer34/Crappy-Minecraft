@@ -55,7 +55,7 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1700, 900, false);
+        window = new Window("Crappy Minecraft", 960, 540, false);
         window.init(input = new Input());
 
         Utils.init();
@@ -97,7 +97,7 @@ public class Game implements IApplication {
     public void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.render(world, player.getCam());
+        renderer.render(world, player);
 
         gui.newFrame();
 

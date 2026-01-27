@@ -9,7 +9,10 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImInt;
 import org.joml.Vector2i;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 import utils.Direction;
+import utils.RayCastResult;
+import utils.RayCaster;
 import utils.Utils;
 import world.World;
 
@@ -21,6 +24,7 @@ public class GUI {
     Player player;
     PlayerManager playerManager;
     World world;
+    RayCaster rayCaster;
 
     ImGuiImplGlfw imGuiGlfw;
     ImGuiImplGl3 imGuiGl3;
@@ -56,6 +60,7 @@ public class GUI {
         this.cam = player.getCam();
         this.player = player;
         this.world = world;
+        this.rayCaster = new RayCaster(world);
         this.playerManager = playerManager;
 
         this.imGuiGlfw = new ImGuiImplGlfw();
@@ -125,6 +130,10 @@ public class GUI {
         String s3 = String.format("Player vel x: %.3f y: %.3f z: %.3f", vel.x, vel.y, vel.z);
         ImGui.text(s3);
 
+        Vector3i pos2 = rayCaster.castRay(player.getEyePos(), player.getCam().getFront(), player.getReach()).targetPos();
+        String s5 = String.format("Target Block x: %d y: %d z: %d", pos2.x, pos2.y, pos2.z);
+        ImGui.text(s5);
+
         int groundHeight = world.getGroundHeight((int)pos.x, (int)pos.z);
         ImGui.text("Ground height: " + groundHeight);
 
@@ -163,7 +172,7 @@ public class GUI {
         }
 
         float[] timeSpeedArray = {timeSpeed};
-        if (ImGui.sliderFloat("Time speed", timeSpeedArray, 0.1f, 10.0f)) {
+        if (ImGui.sliderFloat("Time speed", timeSpeedArray, 0.0f, 5.0f)) {
             timeSpeed = timeSpeedArray[0];
             world.setTimeSpeed(timeSpeed);
         }

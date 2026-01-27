@@ -1,11 +1,17 @@
 package graphics;
 
 import core.Window;
+import game.Player;
 import org.joml.Math;
 import org.joml.*;
+import org.lwjgl.system.MemoryUtil;
+import utils.RayCastResult;
+import utils.RayCaster;
 import world.World;
 
-import static org.lwjgl.opengl.GL30.*;
+import java.nio.FloatBuffer;
+
+import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
 
@@ -13,6 +19,7 @@ public class Renderer {
 
     private Shader blockShader;
     private Shader waterShader;
+    private Shader lineShader;
 
     private Matrix4f projMatrix = new Matrix4f();
     private Matrix4f viewMatrix = new Matrix4f();
@@ -71,9 +78,19 @@ public class Renderer {
         waterShader.createUniform("waterTransparency");
 
         waterShader.createUniform("texture_sampler");
+
+        this.lineShader = new Shader();
+        lineShader.createShader("shaders/lineVert.glsl", GL_VERTEX_SHADER);
+        lineShader.createShader("shaders/lineFrag.glsl", GL_FRAGMENT_SHADER);
+        lineShader.link();
+
+        lineShader.createUniform("projMatrix");
+        lineShader.createUniform("viewMatrix");
     }
 
-    public void render(World world, Camera cam) {
+    public void render(World world, Player player) {
+        Camera cam = player.getCam();
+
         viewMatrix = cam.getViewMatrix(viewMatrix);
         projMatrix.identity().perspective(Math.toRadians(fov), (float) window.getWidth() / window.getHeight(), zNear, zFar);
 
@@ -92,6 +109,68 @@ public class Renderer {
         waterShader.unbind();
 
         world.render(blockShader, waterShader, frustum);
+
+        //targeted block outline
+        RayCaster caster = new RayCaster(world);
+        RayCastResult result = caster.castRay(player.getEyePos(), cam.getFront(), player.getReach());
+
+        if(result.hit()) {
+            lineShader.bind();
+
+            lineShader.setUniform("projMatrix", projMatrix);
+            lineShader.setUniform("viewMatrix", viewMatrix);
+
+            lineShader.unbind();
+
+            renderBlockOutline(result.targetPos());
+        }
+    }
+
+    private void renderBlockOutline(Vector3i pos) {
+        //compute vertices
+        float eps = 0.002f;
+        float x = pos.x - eps, y = pos.y - eps, z = pos.z - eps;
+        float x2 = pos.x + 1.0f + eps, y2 = pos.y + 1.0f + eps, z2 = pos.z + 1.0f + eps;
+        float[] verts = {
+                // bottom ring
+                x, y, z,  x2, y, z,
+                x2, y, z, x2, y, z2,
+                x2, y, z2, x, y, z2,
+                x, y, z2, x, y, z,
+                // top ring
+                x, y2, z,  x2, y2, z,
+                x2, y2, z, x2, y2, z2,
+                x2, y2, z2, x, y2, z2,
+                x, y2, z2, x, y2, z,
+                // verticals
+                x, y, z, x, y2, z,
+                x2, y, z, x2, y2, z,
+                x2, y, z2, x2, y2, z2,
+                x, y, z2, x, y2, z2
+        };
+
+        int vao = glGenVertexArrays();
+        glBindVertexArray(vao);
+
+        int vbo = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+        FloatBuffer fb = MemoryUtil.memAllocFloat(verts.length);
+        fb.put(verts).flip();
+        glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        lineShader.bind();
+        glDrawArrays(GL_LINES, 0, verts.length / 3);
+        lineShader.unbind();
+
+        glDisableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+
+        glDeleteBuffers(vbo);
+        glDeleteVertexArrays(vao);
     }
 
     public void setzNear(float zNear) {
