@@ -22,7 +22,9 @@ public class Chunk {
     private final int MAX_HEIGHT;
 
     private int chunkX, chunkZ;
-    BlockType[] blocks;
+
+    int[] blocks;
+
     private boolean isVisible = true;
 
     private float[] solidVert = new float[]{};
@@ -44,7 +46,7 @@ public class Chunk {
         this.chunkZ = z;
         this.SIZE = size;
         this.MAX_HEIGHT = maxHeight;
-        this.blocks = new BlockType[SIZE * SIZE * MAX_HEIGHT];
+        this.blocks = new int[SIZE * SIZE * MAX_HEIGHT];
     }
 
     public void renderSolid() {
@@ -74,17 +76,17 @@ public class Chunk {
         glDepthFunc(GL_LESS);
     }
 
-    public BlockType getBlock(int x, int y, int z) {
+    public int getBlockID(int x, int y, int z) {
         if(!isValidCoord(x, y, z)) {
-            return BlockType.AIR_BLOCK;
+            return -1;
         }
         return blocks[getIdx(x, y, z)];
     }
 
-    public void setBlock(Vector3i localPos, BlockType block) {
+    public void setBlock(Vector3i localPos, int blockID) {
         if(!isValidCoord(localPos.x, localPos.y, localPos.z))
             throw new RuntimeException("Trying to set block to illegal coords: " + localPos);
-        blocks[getIdx(localPos.x, localPos.y, localPos.z)] = block;
+        blocks[getIdx(localPos.x, localPos.y, localPos.z)] = blockID;
     }
 
     private boolean isValidCoord(int x, int y, int z) {
@@ -170,7 +172,7 @@ public class Chunk {
         MemoryUtil.memFree(waterIdxBuffer);
     }
 
-    public void setBlocks(BlockType[] blocks) {
+    public void setBlockIDs(int[] blocks) {
         this.blocks = blocks;
     }
 
@@ -202,7 +204,7 @@ public class Chunk {
         return chunkZ;
     }
 
-    public BlockType[] getBlocks() {
+    public int[] getBlocks() {
         return blocks;
     }
 

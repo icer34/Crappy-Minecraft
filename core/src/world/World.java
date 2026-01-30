@@ -1,10 +1,11 @@
 package world;
 
-import blocks.BlockType;
+import blocks.AirBlock;
+import blocks.Block;
+import blocks.StoneBlock;
 import graphics.*;
 import org.joml.*;
 import org.lwjgl.glfw.GLFW;
-import utils.Utils;
 
 import java.util.Map;
 import java.util.Queue;
@@ -35,7 +36,13 @@ public class World {
     private float waterTransparency = 0.6f;
     private boolean isUnderWater = false;
 
-    private final ChunkMesh chunkMesh = new ChunkMesh(CHUNK_SIZE, MAX_HEIGHT);
+    private final TerrainGenerator terrainGenerator;
+
+    private final BlockRegistry blockRegistry = new BlockRegistry();
+
+    private final TextureAtlas textureAtlas = new TextureAtlas(16);
+
+    private final ChunkMesh chunkMesh = new ChunkMesh(CHUNK_SIZE, MAX_HEIGHT, blockRegistry, textureAtlas);
 
     //chunks that are ready to be rendered
     Map<Long, Chunk> chunks = new ConcurrentHashMap<>();
@@ -52,7 +59,21 @@ public class World {
     private Vector3f playerPos;
 
     public World(long seed) {
-        Utils.TERRAIN_GENERATOR.init(seed, MAX_HEIGHT, CHUNK_SIZE);
+        //setup block registry
+        //(scan all blocks, add them to the registry) -> JSON ? java files scan ? ...?
+        blockRegistry.insert(new AirBlock());
+        blockRegistry.insert(new StoneBlock());
+
+        //setup texture atlas
+        for(Block b : blockRegistry.getBlocks()) {
+            for(int face = 0; face < 6; face++) {
+                int textureSlotID = textureAtlas.getOrInsert(b.textureKey(face));
+                b.setTextureID(face, textureSlotID);
+            }
+        }
+        textureAtlas.generateMipmaps();
+
+        this.terrainGenerator = new TerrainGenerator(seed, MAX_HEIGHT, CHUNK_SIZE, blockRegistry);
         sun = new DirectionalLight();
     }
 
@@ -77,7 +98,6 @@ public class World {
         blockShader.setUniform("fogDensity", waterFogDensity);
         blockShader.setUniform("isUnderWater", isUnderWater ? 1 : 0);
         glActiveTexture(GL_TEXTURE0);
-        Utils.BLOCK_ATLAS.bindAtlas();
         blockShader.unbind();
 
         waterShader.bind();
@@ -91,7 +111,6 @@ public class World {
         waterShader.setUniform("isUnderWater", isUnderWater ? 1 : 0);
         waterShader.setUniform("waterTransparency", waterTransparency);
         glActiveTexture(GL_TEXTURE0);
-        Utils.BLOCK_ATLAS.bindAtlas();
         waterShader.unbind();
 
         frustum.cull(chunks);
@@ -200,7 +219,7 @@ public class World {
 
                     pool.submit(() -> {
                         try{
-                            BlockType[] blocks = Utils.TERRAIN_GENERATOR.generateChunk(cx, cz);
+                            int[] blocks = terrainGenerator.generateChunk(cx, cz);
 
                             MeshData mesh = chunkMesh.generateChunkMesh(chunks, blocks, cx, cz);
 
@@ -223,7 +242,7 @@ public class World {
 
             Chunk c = new Chunk(result.chunkX(), result.chunkZ(), CHUNK_SIZE, MAX_HEIGHT);
 
-            c.setBlocks(result.blocks());
+            c.setBlockIDs(result.blocks());
 
             c.setSolidMeshData(result.data().solidVert(), result.data().solidIdx());
             c.setWaterMeshData(result.data().waterVertx(), result.data().waterIdx());
@@ -254,14 +273,16 @@ public class World {
         n.updateBuffers();
     }
 
-    public void setBlock(BlockType block, Vector3i wPos) {
+    public void setBlock(String blockName, Vector3i wPos) {
+        if(wPos.y >= MAX_HEIGHT) return;
+
         int cx = (int) floor((float) wPos.x / CHUNK_SIZE);
         int cz = (int) floor((float) wPos.z / CHUNK_SIZE);
 
         Chunk c = chunks.get(getChunkID(cx, cz));
 
         Vector3i localPos = new Vector3i(wPos.x - cx * CHUNK_SIZE, wPos.y, wPos.z - cz * CHUNK_SIZE);
-        c.setBlock(localPos, block);
+        c.setBlock(localPos, blockRegistry.idFromName(blockName));
 
         remeshChunk(cx, cz);
         remeshChunk(cx + 1, cz);
@@ -271,7 +292,7 @@ public class World {
     }
 
     public void breakBlock(Vector3i wPos) {
-        setBlock(BlockType.AIR_BLOCK, wPos);
+        setBlock("air_block", wPos);
     }
 
     public void regenerate() {
@@ -350,14 +371,14 @@ public class World {
 
     public void setSeaLvl(int seaLvl) {
         this.seaLvl = seaLvl;
-        Utils.TERRAIN_GENERATOR.setSeaLvl(seaLvl);
+        terrainGenerator.setSeaLvl(seaLvl);
     }
 
     public int getGroundHeight(float x, float z) {
         int wx = (int) floor(x);
         int wz = (int) floor(z);
 
-        return Utils.TERRAIN_GENERATOR.getHeight(wx, wz) + 1;
+        return terrainGenerator.getHeight(wx, wz) + 1;
     }
 
     public Vector2i getChunkCoords(Vector3f pos) {
@@ -366,22 +387,41 @@ public class World {
         return new Vector2i(cx, cz);
     }
 
-    public BlockType getBlockAt(Vector3f pos) {
-        int wx = (int) floor(pos.x);
-        int wy = (int) floor(pos.y);
-        int wz = (int) floor(pos.z);
+    public Block getBlockAt(Vector3f pos) {
+        Vector3i wPos = new Vector3i((int) floor(pos.x),
+                                     (int) floor(pos.y),
+                                     (int) floor(pos.z));
 
-        if (wy < 0 || wy >= MAX_HEIGHT) return BlockType.AIR_BLOCK;
+        return getBlockAt(wPos);
+    }
+
+    public Block getBlockAt(Vector3i pos) {
+        int wx = pos.x;
+        int wy = pos.y;
+        int wz = pos.z;
+
+        if (wy < 0 || wy >= MAX_HEIGHT) return blockRegistry.blockFromName("air_block");
 
         int cx = (int) floor((float)wx / CHUNK_SIZE);
         int cz = (int) floor((float)wz / CHUNK_SIZE);
 
         Chunk c = chunks.get(getChunkID(cx, cz));
-        if (c == null) return BlockType.AIR_BLOCK;
+        if (c == null) return blockRegistry.blockFromName("air_block");
 
         int lx = wx - cx * CHUNK_SIZE;
         int lz = wz - cz * CHUNK_SIZE;
 
-        return c.getBlock(lx, wy, lz);
+        return blockRegistry.blockFromID(c.getBlockID(lx, wy, lz));
+    }
+
+    public TerrainGenerator getGenerator() {
+        return terrainGenerator;
+    }
+
+    public int getBlockID(String name) {
+        return blockRegistry.idFromName(name);
+    }
+    public Block getBlock(String name) {
+        return blockRegistry.blockFromName(name);
     }
 }

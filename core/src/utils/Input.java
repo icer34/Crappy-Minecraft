@@ -1,5 +1,7 @@
 package utils;
 
+import java.util.Arrays;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Input {
@@ -14,6 +16,8 @@ public class Input {
     private double dx, dy;
     private boolean firstMouse = true;
 
+    private boolean enabled = true;
+
     public void keyboardCallback(long window, int key, int scancode, int action, int mods) {
         if (key < 0 || key >= keys.length) return;
 
@@ -27,6 +31,8 @@ public class Input {
 
 
     public void mouseButtonCallback(long window, int button, int action, int mods) {
+        if(!enabled) return;
+
         if (button < 0 || button >= buttons.length) return;
 
         if(action == GLFW_PRESS) {
@@ -89,5 +95,15 @@ public class Input {
         firstMouse = true;
         dx = 0;
         dy = 0;
+    }
+
+    public void enable() {
+        this.enabled = true;
+    }
+
+    public void disable() {
+        this.enabled = false;
+        Arrays.fill(keysPressed, false);
+        Arrays.fill(buttonsPressed, false);
     }
 }

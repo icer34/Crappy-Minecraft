@@ -1,6 +1,5 @@
 package game;
 
-import blocks.BlockType;
 import graphics.Camera;
 import org.joml.Vector3f;
 
@@ -17,7 +16,7 @@ public class Player {
     private boolean freeCam;
 
     private float reach;
-    private BlockType selectedBlock;
+    private String selectedBlock;
 
     private float walkSpeed;
     private float flySpeed;
@@ -36,7 +35,7 @@ public class Player {
         this.gravity = -15f;
         this.jumpVelocity = 6.0f;
         this.reach = 4.0f;
-        this.selectedBlock = BlockType.STONE_BLOCK;
+        this.selectedBlock = "stone_block";
     }
 
     /*
@@ -197,7 +196,7 @@ public class Player {
         this.reach = reach;
     }
 
-    public BlockType getSelectedBlock() {
+    public String getSelectedBlock() {
         return selectedBlock;
     }
 }

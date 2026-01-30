@@ -1,6 +1,7 @@
 package graphics;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
@@ -10,13 +11,14 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.lwjgl.opengl.GL30.*;
+import static org.lwjgl.opengl.GL33.*;
 
 public class Shader {
     private int programID;
 
     private int vertID;
     private int fragID;
+    private int geomID;
 
     private Map<String, Integer> uniforms;
 
@@ -27,12 +29,21 @@ public class Shader {
 
     public void createShader(String path, int type) {
         int id = glCreateShader(type);
-        if(type == GL_VERTEX_SHADER) {
-            vertID = id;
-        } else if(type == GL_FRAGMENT_SHADER) {
-            fragID = id;
-        } else {
-            throw new RuntimeException("Unknown shader type: " + type + "(should be 35632 or 35633)");
+        switch (type) {
+            case GL_FRAGMENT_SHADER:
+                fragID = id;
+                break;
+
+            case GL_VERTEX_SHADER:
+                vertID = id;
+                break;
+
+            case GL_GEOMETRY_SHADER:
+                geomID = id;
+                break;
+
+            default:
+                throw new RuntimeException("Please select a valid shader type");
         }
 
         String shaderCode;
@@ -87,6 +98,16 @@ public class Shader {
             );
         }
         glUniform3f(loc, value.x, value.y, value.z);
+    }
+
+    public void setUniform(String name, Vector2f value) {
+        Integer loc = uniforms.get(name);
+        if (loc == null) {
+            throw new IllegalStateException(
+                    "Uniform '" + name + "' not created or not found in shader"
+            );
+        }
+        glUniform2f(loc, value.x, value.y);
     }
 
     public void setUniform(String name, Matrix4f value) {

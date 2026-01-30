@@ -6,7 +6,6 @@ import core.Window;
 import graphics.*;
 
 import org.joml.Vector3f;
-import utils.Utils;
 import utils.Input;
 import world.World;
 
@@ -55,10 +54,8 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 960, 540, false);
+        window = new Window("Crappy Minecraft", 1600, 900, false);
         window.init(input = new Input());
-
-        Utils.init();
 
         renderer = new Renderer(window, 60.0f, 0.001f, 1000.0f);
 
@@ -79,6 +76,11 @@ public class Game implements IApplication {
         if(input.consumeKeyPress(GLFW_KEY_ESCAPE)) {
             gui.setShowSettings(!gui.showSettings());
             window.toggleCursor(input);
+            if (gui.showSettings()) {
+                input.disable();
+            } else {
+                input.enable();
+            }
         }
 
         if(input.consumeKeyPress(GLFW_KEY_GRAVE_ACCENT)) {

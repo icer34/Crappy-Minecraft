@@ -38,6 +38,7 @@ public class Window {
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_SAMPLES, 4);
 
         this.windowHandle = glfwCreateWindow(this.width, this.height, this.name, NULL, NULL);
         if(windowHandle == NULL) {
@@ -67,6 +68,14 @@ public class Window {
         glfwShowWindow(windowHandle);
 
         GL.createCapabilities();
+
+        glfwSetFramebufferSizeCallback(windowHandle, (window, width, height) -> {
+           if(width == 0 || height == 0) return;
+
+           glViewport(0, 0, width, height);
+           this.width = width;
+           this.height = height;
+        });
     }
 
     public void update() {

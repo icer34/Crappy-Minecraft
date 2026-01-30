@@ -1,7 +1,8 @@
 package world;
 
-import blocks.BlockType;
 import utils.PerlinNoise;
+
+import java.util.Arrays;
 
 public class TerrainGenerator {
 
@@ -17,17 +18,18 @@ public class TerrainGenerator {
 
     private PerlinNoise terrainNoise;
 
-    public TerrainGenerator() {}
+    private BlockRegistry blockRegistry;
 
-    public void init(long seed, int maxHeight, int size){
+    public TerrainGenerator(long seed, int maxHeight, int size, BlockRegistry registry){
         this.seed = seed;
         this.MAX_TERRAIN_HEIGHT = maxHeight;
         this.CHUNK_SIZE = size;
         this.terrainNoise = new PerlinNoise(seed);
+        this.blockRegistry = registry;
     }
 
-    public BlockType[] generateChunk(int cx, int cz) {
-        BlockType[] blocks = new BlockType[CHUNK_SIZE * CHUNK_SIZE * MAX_TERRAIN_HEIGHT];
+    public int[] generateChunk(int cx, int cz) {
+        int[] blocks = new int[CHUNK_SIZE * CHUNK_SIZE * MAX_TERRAIN_HEIGHT];
 
         int baseX = cx * CHUNK_SIZE;
         int baseZ = cz * CHUNK_SIZE;
@@ -48,20 +50,17 @@ public class TerrainGenerator {
 
                     if (y == h) {
                         if(y == seaLvl || y == seaLvl - 1)
-                            blocks[idx] = BlockType.SAND_BLOCK;
+                            blocks[idx] = blockRegistry.idFromName("stone_block");
                         else
-                            blocks[idx] = BlockType.GRASS_BLOCK;
+                            blocks[idx] = blockRegistry.idFromName("stone_block");
                     }
 
-                    else if (y > h - 3) blocks[idx] = BlockType.DIRT_BLOCK;
-                    else blocks[idx] = BlockType.STONE_BLOCK;
+                    else if (y > h - 3) blocks[idx] = blockRegistry.idFromName("stone_block");
+                    else blocks[idx] = blockRegistry.idFromName("stone_block");
                 }
 
-                for (int y = h + 1; y < MAX_TERRAIN_HEIGHT; y++) {
-                    int idx = getIdx(x, y, z);
-
-                    if (y < seaLvl) blocks[idx] = BlockType.WATER_BLOCK;
-                    else blocks[idx] = BlockType.AIR_BLOCK;
+                for(int y = h + 1; y < MAX_TERRAIN_HEIGHT; y++) {
+                    blocks[getIdx(x, y, z)] = blockRegistry.idFromName("air_block");
                 }
             }
         }

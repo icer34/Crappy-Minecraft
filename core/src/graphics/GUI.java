@@ -11,9 +11,8 @@ import org.joml.Vector2i;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Direction;
-import utils.RayCastResult;
 import utils.RayCaster;
-import utils.Utils;
+import world.TerrainGenerator;
 import world.World;
 
 public class GUI {
@@ -24,6 +23,7 @@ public class GUI {
     Player player;
     PlayerManager playerManager;
     World world;
+    TerrainGenerator terrainGenerator;
     RayCaster rayCaster;
 
     ImGuiImplGlfw imGuiGlfw;
@@ -60,6 +60,7 @@ public class GUI {
         this.cam = player.getCam();
         this.player = player;
         this.world = world;
+        this.terrainGenerator = world.getGenerator();
         this.rayCaster = new RayCaster(world);
         this.playerManager = playerManager;
 
@@ -77,12 +78,12 @@ public class GUI {
         this.timeSpeed = world.getTimeSpeed();
         this.gameMode = (playerManager.getGameMode() instanceof SurvivalMode) ? 0 : 1;
 
-        this.octaves = Utils.TERRAIN_GENERATOR.getOctaves();
-        this.lacunarity = Utils.TERRAIN_GENERATOR.getLacunarity();
-        this.gain = Utils.TERRAIN_GENERATOR.getGain();
-        this.scale = Utils.TERRAIN_GENERATOR.getScale();
-        this.seed = Utils.TERRAIN_GENERATOR.getSeed();
-        this.seaLvl = Utils.TERRAIN_GENERATOR.getSeaLvl();
+        this.octaves = terrainGenerator.getOctaves();
+        this.lacunarity = terrainGenerator.getLacunarity();
+        this.gain = terrainGenerator.getGain();
+        this.scale = terrainGenerator.getScale();
+        this.seed = terrainGenerator.getSeed();
+        this.seaLvl = terrainGenerator.getSeaLvl();
 
         ImGui.createContext();
 
@@ -213,25 +214,25 @@ public class GUI {
         int[] octaveArray = {octaves};
         if (ImGui.sliderInt("Octaves", octaveArray, 1, 10)) {
             octaves = octaveArray[0];
-            Utils.TERRAIN_GENERATOR.setOctaves(octaves);
+            terrainGenerator.setOctaves(octaves);
         }
 
         float[] lacunarityArray = {lacunarity};
         if (ImGui.sliderFloat("Lacunarity", lacunarityArray, 1.8f, 3.0f)) {
             lacunarity = lacunarityArray[0];
-            Utils.TERRAIN_GENERATOR.setLacunarity(lacunarity);
+            terrainGenerator.setLacunarity(lacunarity);
         }
 
         float[] gainArray = {gain};
         if (ImGui.sliderFloat("Gain", gainArray, 0.3f, 0.7f)) {
             gain = gainArray[0];
-            Utils.TERRAIN_GENERATOR.setGain(gain);
+            terrainGenerator.setGain(gain);
         }
 
         float[] scaleArray = {scale};
         if (ImGui.sliderFloat("Scale", scaleArray, 0.001f, 0.2f)) {
             scale = scaleArray[0];
-            Utils.TERRAIN_GENERATOR.setScale(scale);
+            terrainGenerator.setScale(scale);
         }
 
         ImInt seaLvlValue = new ImInt(seaLvl);
@@ -243,7 +244,7 @@ public class GUI {
         ImInt seedValue = new ImInt(seed);
         if (ImGui.inputInt("Seed", seedValue)) {
             seed = seedValue.get();
-            Utils.TERRAIN_GENERATOR.setSeed(seed);
+            terrainGenerator.setSeed(seed);
         }
 
         if (ImGui.button("Regenerate terrain")) {

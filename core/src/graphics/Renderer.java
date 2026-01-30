@@ -20,6 +20,7 @@ public class Renderer {
     private Shader blockShader;
     private Shader waterShader;
     private Shader lineShader;
+    private BlockOutline outline = new BlockOutline();
 
     private Matrix4f projMatrix = new Matrix4f();
     private Matrix4f viewMatrix = new Matrix4f();
@@ -82,10 +83,14 @@ public class Renderer {
         this.lineShader = new Shader();
         lineShader.createShader("shaders/lineVert.glsl", GL_VERTEX_SHADER);
         lineShader.createShader("shaders/lineFrag.glsl", GL_FRAGMENT_SHADER);
+        lineShader.createShader("shaders/lineGeom.glsl", GL_GEOMETRY_SHADER);
         lineShader.link();
 
         lineShader.createUniform("projMatrix");
         lineShader.createUniform("viewMatrix");
+        lineShader.createUniform("worldMatrix");
+        lineShader.createUniform("viewport");
+        lineShader.createUniform("thickness");
     }
 
     public void render(World world, Player player) {
@@ -119,58 +124,20 @@ public class Renderer {
 
             lineShader.setUniform("projMatrix", projMatrix);
             lineShader.setUniform("viewMatrix", viewMatrix);
+            Matrix4f worldMatrix = new Matrix4f();
+            Vector3i wPos = result.targetPos();
+            worldMatrix.identity()
+                    .translate(wPos.x + 0.5f, wPos.y + 0.5f, wPos.z + 0.5f)
+                    .scale(1.0f + BlockOutline.EPS)
+                    .translate(-0.5f, -0.5f, -0.5f);
+            lineShader.setUniform("worldMatrix", worldMatrix);
+
+            lineShader.setUniform("viewport", new Vector2f(window.getWidth(), window.getHeight()));
+            lineShader.setUniform("thickness", 1.5f);
+            outline.render();
 
             lineShader.unbind();
-
-            renderBlockOutline(result.targetPos());
         }
-    }
-
-    private void renderBlockOutline(Vector3i pos) {
-        //compute vertices
-        float eps = 0.002f;
-        float x = pos.x - eps, y = pos.y - eps, z = pos.z - eps;
-        float x2 = pos.x + 1.0f + eps, y2 = pos.y + 1.0f + eps, z2 = pos.z + 1.0f + eps;
-        float[] verts = {
-                // bottom ring
-                x, y, z,  x2, y, z,
-                x2, y, z, x2, y, z2,
-                x2, y, z2, x, y, z2,
-                x, y, z2, x, y, z,
-                // top ring
-                x, y2, z,  x2, y2, z,
-                x2, y2, z, x2, y2, z2,
-                x2, y2, z2, x, y2, z2,
-                x, y2, z2, x, y2, z,
-                // verticals
-                x, y, z, x, y2, z,
-                x2, y, z, x2, y2, z,
-                x2, y, z2, x2, y2, z2,
-                x, y, z2, x, y2, z2
-        };
-
-        int vao = glGenVertexArrays();
-        glBindVertexArray(vao);
-
-        int vbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-        FloatBuffer fb = MemoryUtil.memAllocFloat(verts.length);
-        fb.put(verts).flip();
-        glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-
-        lineShader.bind();
-        glDrawArrays(GL_LINES, 0, verts.length / 3);
-        lineShader.unbind();
-
-        glDisableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
-
-        glDeleteBuffers(vbo);
-        glDeleteVertexArrays(vao);
     }
 
     public void setzNear(float zNear) {

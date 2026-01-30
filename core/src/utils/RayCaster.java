@@ -1,6 +1,6 @@
 package utils;
 
-import blocks.BlockType;
+import blocks.Block;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import world.World;
@@ -19,7 +19,7 @@ public class RayCaster {
 
         Vector3f d = new Vector3f(dir);
         if (d.lengthSquared() == 0.0f) {
-            return new RayCastResult(false, new Vector3i(), BlockType.AIR_BLOCK, new Vector3i());
+            return new RayCastResult(false, new Vector3i(), world.getBlockID("air_block"), new Vector3i());
         }
         d.normalize();
 
@@ -52,18 +52,15 @@ public class RayCaster {
         float t = 0.0f;
         while (t <= reach) {
 
-            // Test du voxel courant
-            BlockType type = world.getBlockAt(new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f));
-            if (type != null && type.solid) {
-                return new RayCastResult(true, new Vector3i(x, y, z), type, new Vector3i(hitNormal));
+            Block block = world.getBlockAt(new Vector3f(x + 0.5f, y + 0.5f, z + 0.5f));
+            if (block.isSolid()) {
+                return new RayCastResult(true, new Vector3i(x, y, z), block.getID(), new Vector3i(hitNormal));
             }
 
-            // Avancer vers le prochain voxel: on sort par la face la plus proche
             if (tMaxX < tMaxY && tMaxX < tMaxZ) {
                 x += stepX;
                 t = tMaxX;
                 tMaxX += tDeltaX;
-                // normale = opposée au mouvement
                 hitNormal.set(-stepX, 0, 0);
             } else if (tMaxY < tMaxZ) {
                 y += stepY;
@@ -78,6 +75,6 @@ public class RayCaster {
             }
         }
 
-        return new RayCastResult(false, new Vector3i(), BlockType.AIR_BLOCK, new Vector3i());
+        return new RayCastResult(false, new Vector3i(), world.getBlockID("air_block"), new Vector3i());
     }
 }

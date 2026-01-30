@@ -1,6 +1,6 @@
 package game;
 
-import blocks.BlockType;
+import blocks.Block;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;
@@ -52,12 +52,12 @@ public class SurvivalMode implements GameMode{
     private void processPlayerActions(Player player, Input input, RayCastResult rayCastResult) {
         // --- PLAYER BROKE BLOCK ---
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1) && rayCastResult.hit()) {
-            world.breakBlock(rayCastResult.targetPos());
+            Block b = world.getBlockAt(rayCastResult.targetPos());
+            b.onBreak(world, rayCastResult.targetPos());
         }
 
         // --- PLAYER PLACED BLOCK ---
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_2) && rayCastResult.hit()) {
-
             Vector3i targetPos = rayCastResult.targetPos();
             targetPos.add(rayCastResult.targetNorm());
 
@@ -65,7 +65,8 @@ public class SurvivalMode implements GameMode{
             Vector3i playerBlockPos = new Vector3i((int) floor(playerPos.x), (int) floor(playerPos.y), (int) floor(playerPos.z));
             if(targetPos.equals(playerBlockPos) || targetPos.equals(playerBlockPos.add(0, 1, 0))) return;
 
-            world.setBlock(player.getSelectedBlock(), targetPos);
+            Block b = world.getBlock(player.getSelectedBlock());
+            b.onPlacement(world, targetPos);
         }
     }
 
@@ -100,8 +101,8 @@ public class SurvivalMode implements GameMode{
         if (delta.x != 0.0f) {
             float testX = p.x + delta.x + (delta.x > 0 ? r : -r);
 
-            if (world.getBlockAt(new Vector3f(testX, p.y + 0.2f, p.z)).solid ||
-                    world.getBlockAt(new Vector3f(testX, p.y + 1.2f, p.z)).solid) {
+            if (world.getBlockAt(new Vector3f(testX, p.y + 0.2f, p.z)).isSolid() ||
+                    world.getBlockAt(new Vector3f(testX, p.y + 1.2f, p.z)).isSolid()) {
                 return true;
             }
         }
@@ -110,8 +111,8 @@ public class SurvivalMode implements GameMode{
         if (delta.z != 0.0f) {
             float testZ = p.z + delta.z + (delta.z > 0 ? r : -r);
 
-            if (world.getBlockAt(new Vector3f(p.x, p.y + 0.2f, testZ)).solid ||
-                    world.getBlockAt(new Vector3f(p.x, p.y + 1.2f, testZ)).solid) {
+            if (world.getBlockAt(new Vector3f(p.x, p.y + 0.2f, testZ)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x, p.y + 1.2f, testZ)).isSolid()) {
                 return true;
             }
         }
@@ -122,22 +123,18 @@ public class SurvivalMode implements GameMode{
         if (delta.y < 0.0f) {
             float testY = p.y + delta.y - EPS;
 
-            if (world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).solid) {
-                return true;
-            }
+            return world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).isSolid();
         } else if (delta.y > 0.0f) {
 
             float testY = p.y + h + delta.y + EPS;
 
-            if (world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).solid ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).solid) {
-                return true;
-            }
+            return world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).isSolid() ||
+                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).isSolid();
         }
 
         return false;
@@ -204,7 +201,7 @@ public class SurvivalMode implements GameMode{
 
         for (float x : xs) {
             for (float z : zs) {
-                if (world.getBlockAt(new Vector3f(x, probeY, z)).solid) {
+                if (world.getBlockAt(new Vector3f(x, probeY, z)).isSolid()) {
                     // bloc touché = floor(probeY), top = +1
                     float topY = (float) Math.floor(probeY) + 1.0f;
                     if (topY > best) best = topY;
@@ -227,7 +224,7 @@ public class SurvivalMode implements GameMode{
 
         for (float x : xs) {
             for (float z : zs) {
-                if (world.getBlockAt(new Vector3f(x, probeY, z)).solid) {
+                if (world.getBlockAt(new Vector3f(x, probeY, z)).isSolid()) {
                     // bloc touché = floor(probeY), bottom = blocY
                     float bottomY = (float) Math.floor(probeY);
                     if (bottomY < best) best = bottomY;
