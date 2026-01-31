@@ -58,6 +58,16 @@ public class Renderer {
         blockShader.createUniform("fogDensity");
 
         blockShader.createUniform("texture_sampler");
+        blockShader.createUniform("texture_padding");
+        blockShader.createUniform("texture_size");
+        blockShader.createUniform("atlas_size");
+        blockShader.createUniform("slots_per_row");
+        blockShader.bind();
+        blockShader.setUniform("texture_padding", 16.0f);
+        blockShader.setUniform("texture_size", 16.0f);
+        blockShader.setUniform("atlas_size", 1024.0f);
+        blockShader.setUniform("slots_per_row", (float)(1024 / (16 + 16)));
+        blockShader.unbind();
 
         this.waterShader = new Shader();
         waterShader.createShader("shaders/waterVert.glsl", GL_VERTEX_SHADER);
@@ -79,6 +89,17 @@ public class Renderer {
         waterShader.createUniform("waterTransparency");
 
         waterShader.createUniform("texture_sampler");
+        waterShader.createUniform("texture_padding");
+        waterShader.createUniform("texture_size");
+        waterShader.createUniform("atlas_size");
+        waterShader.createUniform("slots_per_row");
+        waterShader.bind();
+        waterShader.setUniform("texture_padding", 16.0f);
+        waterShader.setUniform("texture_size", 16.0f);
+        waterShader.setUniform("atlas_size", 1024.0f);
+        waterShader.setUniform("slots_per_row", (float)(1024 / (16 + 16)));
+        waterShader.unbind();
+
 
         this.lineShader = new Shader();
         lineShader.createShader("shaders/lineVert.glsl", GL_VERTEX_SHADER);

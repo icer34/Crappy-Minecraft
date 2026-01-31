@@ -12,7 +12,8 @@ import static org.lwjgl.stb.STBImage.*;
 
 public class TextureAtlas {
 
-    //TODO cache uv coords at creation
+    // cache for texture UV coords to avoid the computation every time a face is added to a mesh
+    HashMap<Integer, float[]> UVcoords = new HashMap<>();
 
     HashMap<String, Integer> texturesSlots = new HashMap<>();
 
@@ -20,7 +21,7 @@ public class TextureAtlas {
 
     private final int SIZE;
     private final int SLOT_SIZE;
-    private final int PADDING = 16; // 8 pixels de chaque côté
+    private final int PADDING = 16;
     private final int SLOTS_PER_ROW;
 
     private final int atlasID;
@@ -57,7 +58,7 @@ public class TextureAtlas {
                      (ByteBuffer) null);
     }
 
-    public int getOrInsert(String textureKey) {
+    public int insert(String textureKey) {
         if(texturesSlots.containsKey(textureKey)) {
             return texturesSlots.get(textureKey);
         }
@@ -106,6 +107,7 @@ public class TextureAtlas {
         }
 
         texturesSlots.put(textureKey, id);
+        UVcoords.put(id, computeUV(id));
         return id;
     }
 
@@ -163,11 +165,15 @@ public class TextureAtlas {
     }
 
     public float[] getUVForFace(int textureID) {
+        return UVcoords.get(textureID);
+    }
+
+    private float[] computeUV(int textureID) {
         int slotX = textureID % SLOTS_PER_ROW;
         int slotY = textureID / SLOTS_PER_ROW;
 
-        int px = slotX * (SLOT_SIZE + PADDING) + 8;
-        int py = slotY * (SLOT_SIZE + PADDING) + 8;
+        int px = slotX * (SLOT_SIZE + PADDING) + (PADDING / 2);
+        int py = slotY * (SLOT_SIZE + PADDING) + (PADDING / 2);
 
         float inv = 1.0f / (float) SIZE;
 

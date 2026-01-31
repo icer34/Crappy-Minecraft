@@ -67,7 +67,7 @@ public class World {
         //setup texture atlas
         for(Block b : blockRegistry.getBlocks()) {
             for(int face = 0; face < 6; face++) {
-                int textureSlotID = textureAtlas.getOrInsert(b.textureKey(face));
+                int textureSlotID = textureAtlas.insert(b.textureKey(face));
                 b.setTextureID(face, textureSlotID);
             }
         }

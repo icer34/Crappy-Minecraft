@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import world.BlockRegistry;
 import world.Chunk;
 
+import java.util.Collections;
 import java.util.Map;
 
 public class ChunkMesh {
@@ -114,31 +115,29 @@ public class ChunkMesh {
     }
 
     private void addFace(FloatArrayList verts, IntArrayList indices,
-                         float dx, float dy, float dz,
+                         float x, float y, float z,
                          int addedFaces,
                          int blockID,
                          int face)
     {
+        //we pack data of a vertex in a 32-bit integer -> 1 face == 4 * 32 bits
+        //data format: x - y - z - faceIdx - cornerIdx - textureID -> in bits: 4 - 9 - 4 - 3 - 2 - 10
+
         Block b = registry.blockFromID(blockID);
+        int textureID = b.getTextureID(face);
 
-        float[] uv = atlas.getUVForFace(b.getTextureID(face));
-        float[] n  = BlockMesh.FACE_NRM[face];
-        float[][] p = BlockMesh.FACE_POS[face];
+        for(int corner = 0; corner < 4; corner++) {
+            int data = ((int) x << 28) |
+                       ((int) y << 19) |
+                       ((int) z << 15) |
+                       (face << 12)    |
+                       (corner << 10)  |
+                       (textureID);
 
-        for (int v = 0; v < 4; v++) {
-            verts.add(p[v][0] + dx);
-            verts.add(p[v][1] + dy);
-            verts.add(p[v][2] + dz);
-
-            verts.add(n[0]);
-            verts.add(n[1]);
-            verts.add(n[2]);
-
-            verts.add(uv[v*2]);
-            verts.add(uv[v*2 + 1]);
+            verts.add(Float.intBitsToFloat(data));
         }
 
-        for (int i = 0; i < 6; i++) {
+        for(int i = 0; i < 6; i++) {
             indices.add(BlockMesh.FACE_IDX[i] + 4 * addedFaces);
         }
     }

@@ -61,7 +61,7 @@ public class Game implements IApplication {
 
         world = new World(0);
 
-        player = new Player(new Vector3f(0.0f, 65.0f, 0.0f));
+        player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f) + 5.0f, 0.0f));
         playerManager = new PlayerManager();
         playerManager.setMode(player, new SurvivalMode(world));
 
