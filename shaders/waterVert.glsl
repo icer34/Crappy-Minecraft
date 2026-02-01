@@ -92,5 +92,6 @@ void main() {
     pos.y += (sin(pos.x * 3.14156592 / 2 + time) +
               sin(pos.z * 3.14156592 / 2 + time * 1.5f)) * 0.05f;
 
+    vWorldPos = (worldMatrix * vec4(pos, 1.0f)).xyz;
     gl_Position = projMatrix * viewMatrix * worldMatrix * vec4(pos, 1.0f);
 }

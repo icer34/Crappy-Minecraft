@@ -85,5 +85,6 @@ void main() {
     uint idx = 4u * face + corner;
     vec3 pos = vec3(x, y, z) + POS[idx];
     vNorm = NORMALS[face];
+    vWorldPos = (worldMatrix * vec4(pos, 1.0f)).xyz;
     gl_Position = projMatrix * viewMatrix * worldMatrix * vec4(pos, 1.0f);
 }

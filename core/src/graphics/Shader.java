@@ -64,6 +64,11 @@ public class Shader {
     }
 
     public void createUniform(String name) {
+        if (glGetProgrami(programID, GL_LINK_STATUS) == 0) {
+            String log = glGetProgramInfoLog(programID);
+            throw new IllegalStateException("Program not linked or linking failed. InfoLog: " + log);
+        }
+
         int loc = glGetUniformLocation(programID, name);
         if(loc < 0)
             throw new RuntimeException("Could not find uniform: " + name);

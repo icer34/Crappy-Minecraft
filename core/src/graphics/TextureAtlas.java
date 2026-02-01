@@ -12,9 +12,6 @@ import static org.lwjgl.stb.STBImage.*;
 
 public class TextureAtlas {
 
-    // cache for texture UV coords to avoid the computation every time a face is added to a mesh
-    HashMap<Integer, float[]> UVcoords = new HashMap<>();
-
     HashMap<String, Integer> texturesSlots = new HashMap<>();
 
     private static final AtomicInteger slotID = new AtomicInteger(-1);
@@ -107,7 +104,6 @@ public class TextureAtlas {
         }
 
         texturesSlots.put(textureKey, id);
-        UVcoords.put(id, computeUV(id));
         return id;
     }
 
@@ -162,32 +158,6 @@ public class TextureAtlas {
             rightBorder.rewind();
             glTexSubImage2D(GL_TEXTURE_2D, 0, x + SLOT_SIZE + i, y, 1, SLOT_SIZE, GL_RGBA, GL_UNSIGNED_BYTE, rightBorder);
         }
-    }
-
-    public float[] getUVForFace(int textureID) {
-        return UVcoords.get(textureID);
-    }
-
-    private float[] computeUV(int textureID) {
-        int slotX = textureID % SLOTS_PER_ROW;
-        int slotY = textureID / SLOTS_PER_ROW;
-
-        int px = slotX * (SLOT_SIZE + PADDING) + (PADDING / 2);
-        int py = slotY * (SLOT_SIZE + PADDING) + (PADDING / 2);
-
-        float inv = 1.0f / (float) SIZE;
-
-        float u0 = (px) * inv;
-        float v0 = (py) * inv;
-        float u1 = (px + SLOT_SIZE) * inv;
-        float v1 = (py + SLOT_SIZE) * inv;
-
-        return new float[] {
-                u0, v1,
-                u0, v0,
-                u1, v0,
-                u1, v1
-        };
     }
 
     public void bind() {

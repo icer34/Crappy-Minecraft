@@ -2,6 +2,7 @@ package world;
 
 import blocks.AirBlock;
 import blocks.Block;
+import blocks.GrassBlock;
 import blocks.StoneBlock;
 import graphics.*;
 import org.joml.*;
@@ -63,6 +64,7 @@ public class World {
         //(scan all blocks, add them to the registry) -> JSON ? java files scan ? ...?
         blockRegistry.insert(new AirBlock());
         blockRegistry.insert(new StoneBlock());
+        blockRegistry.insert(new GrassBlock());
 
         //setup texture atlas
         for(Block b : blockRegistry.getBlocks()) {

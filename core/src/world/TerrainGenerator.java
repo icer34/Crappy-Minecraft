@@ -49,10 +49,7 @@ public class TerrainGenerator {
                     int idx = getIdx(x, y, z);
 
                     if (y == h) {
-                        if(y == seaLvl || y == seaLvl - 1)
-                            blocks[idx] = blockRegistry.idFromName("stone_block");
-                        else
-                            blocks[idx] = blockRegistry.idFromName("stone_block");
+                        blocks[idx] = blockRegistry.idFromName("grass_block");
                     }
 
                     else if (y > h - 3) blocks[idx] = blockRegistry.idFromName("stone_block");

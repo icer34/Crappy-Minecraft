@@ -54,10 +54,10 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1600, 900, false);
+        window = new Window("Crappy Minecraft", 1600, 900, true);
         window.init(input = new Input());
 
-        renderer = new Renderer(window, 60.0f, 0.001f, 1000.0f);
+        renderer = new Renderer(window, 80.0f, 0.001f, 1000.0f);
 
         world = new World(0);
 
