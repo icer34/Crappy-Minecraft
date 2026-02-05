@@ -119,6 +119,8 @@ public class GUI {
 
         ImGui.text("Rendered chunks: " + world.getRenderedChunks());
 
+        ImGui.text("Selected block: " + player.getSelectedBlock());
+
         Vector3f pos = player.getPos();
         String s = String.format("Player coords x: %.3f y: %.3f z: %.3f", pos.x, pos.y, pos.z);
         ImGui.text(s);

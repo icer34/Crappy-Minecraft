@@ -1,6 +1,7 @@
 package game;
 
 import blocks.Block;
+import blocks.BreakableBlock;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;
@@ -40,11 +41,11 @@ public class SurvivalMode implements GameMode{
 
         Vector3f delta = processPlayerMovement(player, input, dt);
 
-        Vector3f dx = new Vector3f(delta.x, 0.0f, 0.0f);
-        if(!isCollision(player, world, dx)) player.applyHorizontalDelta(dx);
+        Vector3f dx = new Vector3f(delta.x + player.getPos().x, player.getPos().y, player.getPos().z);
+        if(!isHorizontalCollision(player, world, dx)) player.applyHorizontalDelta(new Vector3f(delta.x, 0.0f, 0.0f));
 
-        Vector3f dz = new Vector3f(0.0f, 0.0f, delta.z);
-        if(!isCollision(player, world, dz)) player.applyHorizontalDelta(dz);
+        Vector3f dz = new Vector3f(player.getPos().x, player.getPos().y, player.getPos().z + delta.z);
+        if(!isHorizontalCollision(player, world, dz)) player.applyHorizontalDelta(new Vector3f(0.0f, 0.0f, delta.z));
 
         applyGravity(player, world, dt);
     }
@@ -53,7 +54,8 @@ public class SurvivalMode implements GameMode{
         // --- PLAYER BROKE BLOCK ---
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1) && rayCastResult.hit()) {
             Block b = world.getBlockAt(rayCastResult.targetPos());
-            b.onBreak(world, rayCastResult.targetPos());
+            if(b instanceof BreakableBlock bb)
+                bb.onBreak(world, rayCastResult.targetPos());
         }
 
         // --- PLAYER PLACED BLOCK ---
@@ -61,12 +63,16 @@ public class SurvivalMode implements GameMode{
             Vector3i targetPos = rayCastResult.targetPos();
             targetPos.add(rayCastResult.targetNorm());
 
-            Vector3f playerPos = player.getPos();
-            Vector3i playerBlockPos = new Vector3i((int) floor(playerPos.x), (int) floor(playerPos.y), (int) floor(playerPos.z));
-            if(targetPos.equals(playerBlockPos) || targetPos.equals(playerBlockPos.add(0, 1, 0))) return;
+            if(!isPlacementValid(player, targetPos)) return;
 
             Block b = world.getBlock(player.getSelectedBlock());
             b.onPlacement(world, targetPos);
+        }
+
+        // --- PLAYER SELECTED BLOCK ---
+        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_3) && rayCastResult.hit()) {
+            Block b = world.getBlockAt(rayCastResult.targetPos());
+            player.setSelectedBlock(b.name());
         }
     }
 
@@ -90,52 +96,55 @@ public class SurvivalMode implements GameMode{
         return player.computeWalkDelta(inputX, inputZ, dt, new Vector3f());
     }
 
-    private boolean isCollision(Player player, World world, Vector3f delta) {
+    private boolean isPlacementValid(Player player, Vector3i targetPos) {
         Vector3f p = player.getPos();
         float[] hb = player.getHitBox();
 
         float r = hb[0] * 0.5f;
         float h = hb[1];
 
-        // --- X ---
-        if (delta.x != 0.0f) {
-            float testX = p.x + delta.x + (delta.x > 0 ? r : -r);
+        float pMinX = p.x - r;
+        float pMaxX = p.x + r;
+        float pMinY = p.y;
+        float pMaxY = p.y + h;
+        float pMinZ = p.z - r;
+        float pMaxZ = p.z + r;
 
-            if (world.getBlockAt(new Vector3f(testX, p.y + 0.2f, p.z)).isSolid() ||
-                    world.getBlockAt(new Vector3f(testX, p.y + 1.2f, p.z)).isSolid()) {
-                return true;
-            }
-        }
+        float bMinX = targetPos.x;
+        float bMaxX = targetPos.x + 1.0f;
+        float bMinY = targetPos.y;
+        float bMaxY = targetPos.y + 1.0f;
+        float bMinZ = targetPos.z;
+        float bMaxZ = targetPos.z + 1.0f;
+
+        boolean overlapX = pMinX < bMaxX && pMaxX > bMinX;
+        boolean overlapY = pMinY < bMaxY && pMaxY > bMinY;
+        boolean overlapZ = pMinZ < bMaxZ && pMaxZ > bMinZ;
+
+        return !(overlapX && overlapY && overlapZ);
+    }
+
+    private boolean isHorizontalCollision(Player player, World world, Vector3f pos) {
+
+        float[] hb = player.getHitBox();
+        float r = hb[0] * 0.5f;
+
+        float yLow  = pos.y + 0.2f;
+        float yHigh = pos.y + 1.2f;
+
+        // --- X ---
+        if (world.getBlockAt(new Vector3f(pos.x - r, yLow,  pos.z)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x - r, yHigh, pos.z)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x + r, yLow,  pos.z)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x + r, yHigh, pos.z)).isSolid())
+            return true;
 
         // --- Z ---
-        if (delta.z != 0.0f) {
-            float testZ = p.z + delta.z + (delta.z > 0 ? r : -r);
-
-            if (world.getBlockAt(new Vector3f(p.x, p.y + 0.2f, testZ)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x, p.y + 1.2f, testZ)).isSolid()) {
-                return true;
-            }
-        }
-
-        // --- Y (sol/plafond) ---
-        final float EPS = 0.01f;
-
-        if (delta.y < 0.0f) {
-            float testY = p.y + delta.y - EPS;
-
-            return world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).isSolid();
-        } else if (delta.y > 0.0f) {
-
-            float testY = p.y + h + delta.y + EPS;
-
-            return world.getBlockAt(new Vector3f(p.x - r, testY, p.z - r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z - r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x - r, testY, p.z + r)).isSolid() ||
-                    world.getBlockAt(new Vector3f(p.x + r, testY, p.z + r)).isSolid();
-        }
+        if (world.getBlockAt(new Vector3f(pos.x, yLow,  pos.z - r)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x, yHigh, pos.z - r)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x, yLow,  pos.z + r)).isSolid() ||
+            world.getBlockAt(new Vector3f(pos.x, yHigh, pos.z + r)).isSolid())
+            return true;
 
         return false;
     }

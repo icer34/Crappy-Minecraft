@@ -1,5 +1,5 @@
 package world;
 
-import graphics.MeshData;
+import graphics.ChunkMeshData;
 
-public record ChunkBuildResult(int chunkX, int chunkZ, int[] blocks, MeshData data) {}
+public record ChunkBuildResult(int chunkX, int chunkZ, int[] blocks, ChunkMeshData data) {}

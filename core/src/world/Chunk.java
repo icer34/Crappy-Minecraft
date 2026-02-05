@@ -1,20 +1,11 @@
 package world;
 
 import blocks.*;
+import graphics.ChunkMeshData;
+import graphics.PackedMesh;
+import graphics.StandardMesh;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import org.lwjgl.system.MemoryUtil;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
-import static org.lwjgl.opengl.GL15.*;
-import static org.lwjgl.opengl.GL15.GL_STATIC_DRAW;
-import static org.lwjgl.opengl.GL20.glEnableVertexAttribArray;
-import static org.lwjgl.opengl.GL20.glVertexAttribPointer;
-import static org.lwjgl.opengl.GL30.*;
 
 public class Chunk {
 
@@ -27,19 +18,8 @@ public class Chunk {
 
     private boolean isVisible = true;
 
-    private float[] solidVert = new float[]{};
-    private int[] solidIdx = new int[] {};
-    private int solidVao;
-    private int solidEbo;
-    private int solidVbo;
-    private int numSolidVert;
-
-    private float[] waterVert = new float[]{};
-    private int[] waterIdx = new int[]{};
-    private int waterVao;
-    private int waterEbo;
-    private int waterVbo;
-    private int numWaterVert;
+    private PackedMesh solidMesh;
+    private PackedMesh waterMesh;
 
     public Chunk(int x, int z, int size, int maxHeight) {
         this.chunkX = x;
@@ -47,33 +27,16 @@ public class Chunk {
         this.SIZE = size;
         this.MAX_HEIGHT = maxHeight;
         this.blocks = new int[SIZE * SIZE * MAX_HEIGHT];
+        this.solidMesh = new PackedMesh();
+        this.waterMesh = new PackedMesh();
     }
 
     public void renderSolid() {
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-
-        glEnable(GL_DEPTH_TEST);
-
-        glBindVertexArray(solidVao);
-        glDrawElements(GL_TRIANGLES, numSolidVert, GL_UNSIGNED_INT, 0);
+        solidMesh.draw();
     }
 
     public void renderWater() {
-        glDisable(GL_CULL_FACE);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glDepthMask(false);
-        glDepthFunc(GL_LEQUAL);
-
-        glBindVertexArray(waterVao);
-        glDrawElements(GL_TRIANGLES, numWaterVert, GL_UNSIGNED_INT, 0);
-
-        glDepthMask(true);
-        glDisable(GL_BLEND);
-        glDepthFunc(GL_LESS);
+        waterMesh.draw();
     }
 
     public int getBlockID(int x, int y, int z) {
@@ -107,81 +70,17 @@ public class Chunk {
         return new Vector3f(chunkX * SIZE, 0.0f, chunkZ * SIZE);
     }
 
-    public void updateBuffers() {
-
-        //========== WATER BLOCKS BUFFERS ===========
-        FloatBuffer waterVertBuffer = MemoryUtil.memAllocFloat(waterVert.length);
-        waterVertBuffer.put(waterVert).flip();
-        IntBuffer waterIdxBuffer = MemoryUtil.memAllocInt(waterIdx.length);
-        waterIdxBuffer.put(waterIdx).flip();
-
-        this.waterVao = glGenVertexArrays();
-        glBindVertexArray(waterVao);
-
-        this.waterVbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, waterVbo);
-        glBufferData(GL_ARRAY_BUFFER, waterVertBuffer, GL_STATIC_DRAW);
-
-        this.waterEbo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, waterEbo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, waterIdxBuffer, GL_STATIC_DRAW);
-
-        glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, Integer.BYTES, 0);
-        glEnableVertexAttribArray(0);
-
-        glBindVertexArray(0);
-
-        //========== SOLID BLOCKS BUFFERS ===========
-        FloatBuffer solidVertBuffer = MemoryUtil.memAllocFloat(solidVert.length);
-        solidVertBuffer.put(solidVert).flip();
-        IntBuffer solidIdxBuffer = MemoryUtil.memAllocInt(solidIdx.length);
-        solidIdxBuffer.put(solidIdx).flip();
-
-        this.solidVao = glGenVertexArrays();
-        glBindVertexArray(solidVao);
-
-        this.solidVbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, solidVbo);
-        glBufferData(GL_ARRAY_BUFFER, solidVertBuffer, GL_STATIC_DRAW);
-
-        this.solidEbo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, solidEbo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, solidIdxBuffer, GL_STATIC_DRAW);
-
-        glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, Integer.BYTES, 0);
-        glEnableVertexAttribArray(0);
-
-        glBindVertexArray(0);
-
-        //Free memory
-        MemoryUtil.memFree(solidVertBuffer);
-        MemoryUtil.memFree(solidIdxBuffer);
-        MemoryUtil.memFree(waterVertBuffer);
-        MemoryUtil.memFree(waterIdxBuffer);
-    }
-
     public void setBlockIDs(int[] blocks) {
         this.blocks = blocks;
     }
 
     public void cleanup() {
-        glBindVertexArray(0);
-        glDeleteVertexArrays(solidVao);
-
-        glDeleteBuffers(solidVbo);
-        glDeleteBuffers(solidEbo);
+        solidMesh.delete();
     }
 
-    public void setSolidMeshData(float[] vertices, int[] indices) {
-        this.solidVert = vertices;
-        this.solidIdx = indices;
-        this.numSolidVert = indices.length;
-    }
-
-    public void setWaterMeshData(float[] vertices, int[] indices) {
-        this.waterVert = vertices;
-        this.waterIdx = indices;
-        this.numWaterVert = indices.length;
+    public void updateMeshes(ChunkMeshData data) {
+        solidMesh.update(data.solidVert(), data.solidIdx());
+        waterMesh.update(data.waterVert(), data.waterIdx());
     }
 
     public int getChunkX() {

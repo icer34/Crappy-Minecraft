@@ -3,6 +3,7 @@
 //data format : packed in a 32 bit integer -> x-y-z-faceIdx-cornerIdx-textureID
 //                             value in bits: 4-9-4-   3   -    2    -    10
 layout (location = 0) in uint aData;
+layout (location = 1) in uint aData2;
 
 //uniforms needed to compute uv coords from textureID
 uniform float texture_padding;
@@ -48,8 +49,21 @@ const vec3 NORMALS[6] = vec3[6](
 
 //outputs of the shader
 out vec3 vNorm;
-out vec2 vUV;
+out vec2 vBaseUV;
+out vec2 vOvrUV;
 out vec3 vWorldPos;
+
+vec4 getUV(uint textureID) {
+    uint slotx = textureID % uint(slots_per_row);
+    uint sloty = textureID / uint(slots_per_row);
+
+    int px = int(slotx * (texture_size + texture_padding) + (texture_padding / 2));
+    int py = int(sloty * (texture_size + texture_padding) + (texture_padding / 2));
+
+    float inv = 1.0f / atlas_size;
+
+    return vec4(px * inv, py * inv, (px + texture_size) * inv, (py + texture_size) * inv);
+}
 
 void main() {
     //unpack data
@@ -59,28 +73,29 @@ void main() {
     uint face = (aData >> 12) & 0x7u;
     uint corner = (aData >> 10) & 0x3u;
     uint textureID = aData & 0x3FFu;
+    uint ovrTextureID = (aData2 >> 6) & 0x3FFu;
+    uint flags = aData2 & 0x3Fu;
 
-    //uv coords computation
-    uint slotx = textureID % uint(slots_per_row);
-    uint sloty = textureID / uint(slots_per_row);
+    vec4 baseUV = getUV(textureID);
+    vec4 ovrUV = getUV(ovrTextureID);
 
-    int px = int(slotx * (texture_size + texture_padding) + (texture_padding / 2));
-    int py = int(sloty * (texture_size + texture_padding) + (texture_padding / 2));
+    if(corner == 0u) {
+        vBaseUV = vec2(baseUV[0], baseUV[3]);
+        vOvrUV = vec2(ovrUV[0], ovrUV[3]);
 
-    float inv = 1.0f / atlas_size;
-    float u0 = (px) * inv;
-    float v0 = (py) * inv;
-    float u1 = (px + texture_size) * inv;
-    float v1 = (py + texture_size) * inv;
+    } else if(corner == 1u) {
+        vBaseUV = vec2(baseUV[0], baseUV[1]);
+        vOvrUV = vec2(ovrUV[0], ovrUV[1]);
 
-    if(corner == 0u)
-            vUV = vec2(u0, v1);
-    else if(corner == 1u)
-            vUV = vec2(u0, v0);
-    else if(corner == 2u)
-            vUV = vec2(u1, v0);
-    else if(corner == 3u)
-            vUV = vec2(u1, v1);
+    } else if(corner == 2u) {
+        vBaseUV = vec2(baseUV[2], baseUV[1]);
+        vOvrUV = vec2(ovrUV[2], ovrUV[1]);
+
+    } else if(corner == 3u) {
+        vBaseUV = vec2(baseUV[2], baseUV[3]);
+        vOvrUV = vec2(ovrUV[2], ovrUV[3]);
+
+    }
 
     uint idx = 4u * face + corner;
     vec3 pos = vec3(x, y, z) + POS[idx];

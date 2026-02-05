@@ -108,8 +108,8 @@ public class TextureAtlas {
     }
 
     private void addTextureBorders(ByteBuffer textureData, int x, int y) {
-        int bytesPerPixel = 4; // RGBA
-        int paddingPixels = 8;
+        int bytesPerPixel = 4;
+        int paddingPixels = PADDING / 2;
 
         ByteBuffer topBorder = ByteBuffer.allocateDirect(SLOT_SIZE * bytesPerPixel);
         ByteBuffer bottomBorder = ByteBuffer.allocateDirect(SLOT_SIZE * bytesPerPixel);

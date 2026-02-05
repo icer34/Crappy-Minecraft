@@ -1,12 +1,8 @@
 package world;
 
-import blocks.AirBlock;
-import blocks.Block;
-import blocks.GrassBlock;
-import blocks.StoneBlock;
+import blocks.*;
 import graphics.*;
 import org.joml.*;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.Map;
 import java.util.Queue;
@@ -43,7 +39,7 @@ public class World {
 
     private final TextureAtlas textureAtlas = new TextureAtlas(16);
 
-    private final ChunkMesh chunkMesh = new ChunkMesh(CHUNK_SIZE, MAX_HEIGHT, blockRegistry, textureAtlas);
+    private final ChunkMesher chunkMesh = new ChunkMesher(CHUNK_SIZE, MAX_HEIGHT, blockRegistry, textureAtlas);
 
     //chunks that are ready to be rendered
     Map<Long, Chunk> chunks = new ConcurrentHashMap<>();
@@ -55,8 +51,6 @@ public class World {
 
     private Matrix4f worldMatrix = new Matrix4f();
 
-    private DirectionalLight sun;
-
     private Vector3f playerPos;
 
     public World(long seed) {
@@ -65,10 +59,15 @@ public class World {
         blockRegistry.insert(new AirBlock());
         blockRegistry.insert(new StoneBlock());
         blockRegistry.insert(new GrassBlock());
+        blockRegistry.insert(new WaterBlock());
 
         //setup texture atlas
         for(Block b : blockRegistry.getBlocks()) {
             for(int face = 0; face < 6; face++) {
+                if(b instanceof MultiTexturedBlock mt) {
+                    int ovrTextureSlotID = textureAtlas.insert(mt.ovrTextureKey(face));
+                    mt.setOvrTextureID(face, ovrTextureSlotID);
+                }
                 int textureSlotID = textureAtlas.insert(b.textureKey(face));
                 b.setTextureID(face, textureSlotID);
             }
@@ -76,7 +75,6 @@ public class World {
         textureAtlas.generateMipmaps();
 
         this.terrainGenerator = new TerrainGenerator(seed, MAX_HEIGHT, CHUNK_SIZE, blockRegistry);
-        sun = new DirectionalLight();
     }
 
     public void render(Shader blockShader, Shader waterShader, Frustum frustum) {
@@ -87,14 +85,7 @@ public class World {
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         }
 
-        float daytime = -sun.getDir().y; //[-1, 1]
-        float intensity = daytime * daytime;
-        float ambientStrength = 0.25f * intensity;
-
         blockShader.bind();
-        blockShader.setUniform("lightDir", sun.getDir());
-        blockShader.setUniform("lightColor", sun.getColor());
-        blockShader.setUniform("ambientStrength", ambientStrength);
         blockShader.setUniform("texture_sampler", 0);
         blockShader.setUniform("fogColor", waterFogColor);
         blockShader.setUniform("fogDensity", waterFogDensity);
@@ -103,10 +94,7 @@ public class World {
         blockShader.unbind();
 
         waterShader.bind();
-        waterShader.setUniform("time", (float) GLFW.glfwGetTime());
-        waterShader.setUniform("lightDir", sun.getDir());
-        waterShader.setUniform("lightColor", sun.getColor());
-        waterShader.setUniform("ambientStrength", ambientStrength);
+        //waterShader.setUniform("time", (float) GLFW.glfwGetTime());
         waterShader.setUniform("texture_sampler", 0);
         waterShader.setUniform("fogColor", waterFogColor);
         waterShader.setUniform("fogDensity", waterFogDensity);
@@ -119,7 +107,6 @@ public class World {
 
         renderedChunks = 0;
 
-        //====== FIRST PASS: SOLID BLOCKS =======
         for(long key : chunks.keySet()) {
             Chunk c = chunks.get(key);
 
@@ -140,7 +127,6 @@ public class World {
             renderedChunks++;
         }
 
-        //====== SECOND PASS: WATER BLOCKS =======
         for(long key : chunks.keySet()) {
             Chunk c = chunks.get(key);
 
@@ -157,8 +143,6 @@ public class World {
             waterShader.setUniform("worldMatrix", worldMatrix);
             c.renderWater();
             waterShader.unbind();
-
-            renderedChunks++;
         }
     }
 
@@ -166,9 +150,6 @@ public class World {
         this.playerPos = playerPos;
         isUnderWater = (playerPos.y + 1.8f <= seaLvl &&
                         playerPos.y + 1.8f > getGroundHeight((int) floor(playerPos.x), (int) floor(playerPos.z)));
-
-        // === UPDATE SUN POS ===
-        sun.update(deltaTime, TIME_SPEED);
 
         // === UPDATE LOADED CHUNKS ===
         //coords of the chunk the player is in
@@ -203,7 +184,7 @@ public class World {
     }
 
     private void submitChunkLoad(int pcx, int pcz) {
-        int budget = 20;
+        int budget = 10;
         int submitted = 0;
 
         for (int r = 0; r <= LOAD_DISTANCE && submitted < budget; r++) {
@@ -223,7 +204,7 @@ public class World {
                         try{
                             int[] blocks = terrainGenerator.generateChunk(cx, cz);
 
-                            MeshData mesh = chunkMesh.generateChunkMesh(chunks, blocks, cx, cz);
+                            ChunkMeshData mesh = chunkMesh.generateChunkMesh(chunks, blocks, cx, cz, true);
 
                             ready.add(new ChunkBuildResult(cx, cz, blocks, mesh));
                         } catch (Exception e) {
@@ -246,10 +227,7 @@ public class World {
 
             c.setBlockIDs(result.blocks());
 
-            c.setSolidMeshData(result.data().solidVert(), result.data().solidIdx());
-            c.setWaterMeshData(result.data().waterVertx(), result.data().waterIdx());
-
-            c.updateBuffers();
+            c.updateMeshes(result.data());
 
             chunks.put(id, c);
 
@@ -264,15 +242,12 @@ public class World {
     }
 
     private void remeshChunk(int cx, int cz) {
-        Chunk n = chunks.get(getChunkID(cx, cz));
-        if (n == null) return;
+        Chunk c = chunks.get(getChunkID(cx, cz));
+        if (c == null) return;
 
-        MeshData mesh = chunkMesh.generateChunkMesh(chunks, n.getBlocks(), cx, cz);
+        ChunkMeshData mesh = chunkMesh.generateChunkMesh(chunks, c.getBlocks(), cx, cz, true);
 
-        n.setSolidMeshData(mesh.solidVert(), mesh.solidIdx());
-        n.setWaterMeshData(mesh.waterVertx(), mesh.waterIdx());
-
-        n.updateBuffers();
+        c.updateMeshes(mesh);
     }
 
     public void setBlock(String blockName, Vector3i wPos) {

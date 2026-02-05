@@ -9,13 +9,25 @@
 - [ ] Meshing techniques (greedy meshing, ...) ??
 
 ## Graphics
+### General
+- [ ] Fill all the addFace() methods in the ChunkMesher (different data layout for water and solid)
+- [ ] Add tint param in vertex data (both water and solid)
+- [ ] Add a player model (with skin support ?)
 - [ ] Water texture animation
+  - [ ] Different shader for default water and realistic water
 - [x] Moving water surface
 - [ ] Lighting
   - Torch lighting, other light sources ??
   - Better ambient lighting
   - Remove this ugly ass directional lighting
 - [ ] Distance fog 
+- [ ] Sky box
+- [x] Bi-layered textured (Ex: for all types of grass blocks) → there are 6 flag bits to assign biome, ... to a vertex
+### GUI
+- [x] Targeted block outline
+- [ ] Hotbar
+- [ ] Inventory
+- [ ] Crosshair
 
 ## Terrain
 - [x] Perlin noise
@@ -32,6 +44,11 @@
   - ...
 - [ ] Caves
   - Cave features ?
+
+## Audio
+- [ ] Play a background music (per biome ?)
+- [ ] Special sound per block when placed / broken
+- [ ] Play some sfx when clicking buttons in menus
 
 ## Launcher
 - [ ] Supports settings :
@@ -52,6 +69,7 @@
 - [ ] Player sign-in / register account to access servers
 
 ## Game Features
+- [x] In-game settings panel
 - [ ] Redstone
 - [ ] In game chat with commands
   - Permission level system allowing restrictions to certain op commands (tp, game mode, ...)

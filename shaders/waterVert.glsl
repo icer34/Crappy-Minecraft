@@ -1,8 +1,8 @@
 #version 330 core
 
-//data format : packed in a 32 bit integer -> x-y-z-faceIdx-cornerIdx-textureID
-//                             value in bits: 4-9-4-   3   -    2    -    10
+//data format:
 layout (location = 0) in uint aData;
+layout (location = 1) in uint aData2;
 
 //uniforms needed to compute uv coords from textureID
 uniform float texture_padding;
@@ -15,7 +15,7 @@ uniform mat4 projMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 worldMatrix;
 
-uniform float time;
+//uniform float time;
 
 //vertex positions for every face/corner of a cube
 const vec3 POS[24] = vec3[24](
@@ -61,6 +61,8 @@ void main() {
     uint face = (aData >> 12) & 0x7u;
     uint corner = (aData >> 10) & 0x3u;
     uint textureID = aData & 0x3FFu;
+    uint ovrTextureID = (aData2 >> 6) & 0x3FFu;
+    uint flags = aData2 & 0x3Fu;
 
     //uv coords computation
     uint slotx = textureID % uint(slots_per_row);
@@ -84,13 +86,12 @@ void main() {
     else if(corner == 3u)
         vUV = vec2(u1, v1);
 
-    uint idx = 4u * face + corner;
+
     vNorm = NORMALS[face];
 
+    uint idx = 4u * face + corner;
     vec3 pos = vec3(x, y, z) + POS[idx];
-    pos.y -= 0.15f;
-    pos.y += (sin(pos.x * 3.14156592 / 2 + time) +
-              sin(pos.z * 3.14156592 / 2 + time * 1.5f)) * 0.05f;
+    pos.y -= 0.15;
 
     vWorldPos = (worldMatrix * vec4(pos, 1.0f)).xyz;
     gl_Position = projMatrix * viewMatrix * worldMatrix * vec4(pos, 1.0f);

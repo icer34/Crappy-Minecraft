@@ -199,4 +199,6 @@ public class Player {
     public String getSelectedBlock() {
         return selectedBlock;
     }
+
+    public void setSelectedBlock(String name) {this.selectedBlock = name;}
 }

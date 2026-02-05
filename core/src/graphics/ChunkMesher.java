@@ -1,33 +1,33 @@
 package graphics;
 
 import blocks.Block;
+import blocks.MultiTexturedBlock;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import world.BlockRegistry;
 import world.Chunk;
 
-import java.util.Collections;
 import java.util.Map;
 
-public class ChunkMesh {
+public class ChunkMesher {
 
     private final int CHUNK_SIZE;
     private final int MAX_HEIGHT;
     private final BlockRegistry registry;
     private final TextureAtlas atlas;
 
-    public ChunkMesh(int size, int maxHeight, BlockRegistry registry, TextureAtlas atlas) {
+    public ChunkMesher(int size, int maxHeight, BlockRegistry registry, TextureAtlas atlas) {
         this.CHUNK_SIZE = size;
         this.MAX_HEIGHT = maxHeight;
         this.registry = registry;
         this.atlas = atlas;
     }
 
-    public MeshData generateChunkMesh(Map<Long, Chunk> chunks, int[] blockIDs, int chunkX, int chunkZ) {
+    public ChunkMeshData generateChunkMesh(Map<Long, Chunk> chunks, int[] blockIDs, int chunkX, int chunkZ, boolean isPacked) {
 
         // cache ids to avoid repeated lookups
         final int AIR_ID = registry.idFromName("air_block");
-        final int WATER_ID = -1;//registry.idFromName("water_block");
+        final int WATER_ID = registry.idFromName("water_block");
 
         FloatArrayList waterVertList = new FloatArrayList();
         IntArrayList waterIdxList = new IntArrayList();
@@ -48,7 +48,7 @@ public class ChunkMesh {
                     if(blockID == AIR_ID)
                         continue;
 
-                    boolean isWater = false; // (blockID == WATER_ID);
+                    boolean isWater = (blockID == WATER_ID);
 
                     for(int face = 0; face < 6; face++) {
                         int dx = BlockMesh.NEIGHBOR[face][0];
@@ -68,10 +68,12 @@ public class ChunkMesh {
                         }
 
                         if(isWater) {
-                            addFace(waterVertList, waterIdxList, x, y, z, waterFaces, blockID, face);
+                            if(isPacked) addPackedSolidFace(waterVertList, waterIdxList, x, y, z, waterFaces, blockID, face);
+                            else addSolidFace(waterVertList, waterIdxList, x, y, z, waterFaces, blockID, face);
                             waterFaces++;
                         } else {
-                            addFace(solidVertList, solidIdxList, x, y, z, solidFaces, blockID, face);
+                            if(isPacked) addPackedSolidFace(solidVertList, solidIdxList, x, y, z, solidFaces, blockID, face);
+                            else addSolidFace(solidVertList, solidIdxList, x, y, z, solidFaces, blockID, face);
                             solidFaces++;
                         }
                     }
@@ -79,7 +81,7 @@ public class ChunkMesh {
             }
         }
 
-        return new MeshData(
+        return new ChunkMeshData(
                 solidVertList.toFloatArray(), solidIdxList.toIntArray(),
                 waterVertList.toFloatArray(), waterIdxList.toIntArray()
         );
@@ -114,32 +116,70 @@ public class ChunkMesh {
         return nb != null ? nb : registry.blockFromName("air_block");
     }
 
-    private void addFace(FloatArrayList verts, IntArrayList indices,
-                         float x, float y, float z,
-                         int addedFaces,
-                         int blockID,
-                         int face)
+    private void addSolidFace(FloatArrayList verts, IntArrayList indices,
+                              float x, float y, float z,
+                              int addedFaces,
+                              int blockID,
+                              int face)
     {
-        //we pack data of a vertex in a 32-bit integer -> 1 face == 4 * 32 bits
-        //data format: x - y - z - faceIdx - cornerIdx - textureID -> in bits: 4 - 9 - 4 - 3 - 2 - 10
+
+    }
+
+    private void addPackedSolidFace(FloatArrayList verts, IntArrayList indices,
+                              float x, float y, float z,
+                              int addedFaces,
+                              int blockID,
+                              int face)
+    {
+        //we pack data of a vertex in a 32-bit integer + a 16-bit short
+        //data format: x - y - z - faceIdx - cornerIdx - textureID -> in bits: 4 - 9 - 4 - 3 - 2 - 10 = 32
+        //             textureOverlayID - flags -> 10 - 6 = 16
 
         Block b = registry.blockFromID(blockID);
         int textureID = b.getTextureID(face);
+        int ovrTextureID = -1;
+        if(b instanceof MultiTexturedBlock mt) ovrTextureID = mt.getOvrTextureID(face);
+        int flags = 0;
 
         for(int corner = 0; corner < 4; corner++) {
-            int data = ((int) x << 28) |
+            int data1 = ((int) x << 28) |
                        ((int) y << 19) |
                        ((int) z << 15) |
                        (face << 12)    |
                        (corner << 10)  |
                        (textureID);
 
-            verts.add(Float.intBitsToFloat(data));
+            int data2 = ((ovrTextureID << 6) |
+                          (flags));
+
+            verts.add(Float.intBitsToFloat(data1));
+            verts.add(Float.intBitsToFloat(data2));
         }
 
         for(int i = 0; i < 6; i++) {
             indices.add(BlockMesh.FACE_IDX[i] + 4 * addedFaces);
         }
+    }
+
+    private void addWaterFace(FloatArrayList verts, IntArrayList indices,
+                              float x, float y, float z,
+                              int addedFaces,
+                              int blockID,
+                              int face)
+    {
+
+    }
+
+    private void addPackedWaterFace(FloatArrayList verts, IntArrayList indices,
+                              float x, float y, float z,
+                              int addedFaces,
+                              int blockID,
+                              int face)
+    {
+        //we pack data differently for water meshes and solid meshes
+        //for a water vertex we need x, y, z, nx, ny, nz, baseTextureID, textureIDOffset, flags
+
+        //TODO
     }
 
     private long getChunkID(int chunkX, int chunkZ) {

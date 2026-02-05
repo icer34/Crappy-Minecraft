@@ -49,9 +49,6 @@ public class Renderer {
         blockShader.createUniform("viewMatrix");
         blockShader.createUniform("worldMatrix");
 
-        blockShader.createUniform("lightDir");
-        blockShader.createUniform("lightColor");
-        blockShader.createUniform("ambientStrength");
         blockShader.createUniform("fogColor");
         blockShader.createUniform("camPos");
         blockShader.createUniform("isUnderWater");
@@ -77,11 +74,8 @@ public class Renderer {
         waterShader.createUniform("projMatrix");
         waterShader.createUniform("viewMatrix");
         waterShader.createUniform("worldMatrix");
-        waterShader.createUniform("time");
+        //waterShader.createUniform("time");
 
-        waterShader.createUniform("lightDir");
-        waterShader.createUniform("lightColor");
-        waterShader.createUniform("ambientStrength");
         waterShader.createUniform("fogColor");
         waterShader.createUniform("camPos");
         waterShader.createUniform("isUnderWater");
@@ -155,7 +149,10 @@ public class Renderer {
 
             lineShader.setUniform("viewport", new Vector2f(window.getWidth(), window.getHeight()));
             lineShader.setUniform("thickness", 1.5f);
+
+            glDisable(GL_CULL_FACE);
             outline.render();
+            glEnable(GL_CULL_FACE);
 
             lineShader.unbind();
         }

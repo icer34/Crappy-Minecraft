@@ -56,7 +56,12 @@ public class TerrainGenerator {
                     else blocks[idx] = blockRegistry.idFromName("stone_block");
                 }
 
-                for(int y = h + 1; y < MAX_TERRAIN_HEIGHT; y++) {
+                for(int y = h + 1; y < seaLvl; y++) {
+                    blocks[getIdx(x, y, z)] = blockRegistry.idFromName("water_block");
+                }
+
+                for(int y = seaLvl; y < MAX_TERRAIN_HEIGHT; y++) {
+                    if(blockRegistry.blockFromID(blocks[getIdx(x, y, z)]).isSolid()) continue;
                     blocks[getIdx(x, y, z)] = blockRegistry.idFromName("air_block");
                 }
             }
