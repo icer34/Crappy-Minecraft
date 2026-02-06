@@ -1,161 +1,254 @@
 package graphics;
 
+import blocks.Block;
+import blocks.MultiTexturedBlock;
 import core.Window;
 import game.Player;
 import org.joml.Math;
 import org.joml.*;
-import org.lwjgl.system.MemoryUtil;
+import utils.Faces;
 import utils.RayCastResult;
 import utils.RayCaster;
+import world.BlockRegistry;
+import world.Chunk;
 import world.World;
 
-import java.nio.FloatBuffer;
+import java.util.Collection;
 
+import static org.joml.Math.abs;
+import static org.joml.Math.floor;
 import static org.lwjgl.opengl.GL33.*;
 
 public class Renderer {
 
     private final Window window;
+    private final BlockRegistry blockRegistry;
+    private final TextureAtlas textureAtlas;
 
-    private Shader blockShader;
-    private Shader waterShader;
-    private Shader lineShader;
+    private ShaderProgram blockShaderProgram;
+    private ShaderProgram waterShaderProgram;
+    private ShaderProgram lineShaderProgram;
     private BlockOutline outline = new BlockOutline();
 
-    private Matrix4f projMatrix = new Matrix4f();
-    private Matrix4f viewMatrix = new Matrix4f();
-    private Matrix4f worldMatrix = new Matrix4f();
+    private Matrix4f projMatrix = new Matrix4f().identity();
+    private Matrix4f viewMatrix = new Matrix4f().identity();
+    private Matrix4f worldMatrix = new Matrix4f().identity();
 
     private Frustum frustum = new Frustum();
 
     private float zNear, zFar;
     private float fov;
 
-    public Renderer(Window window, float fov, float zNear, float zFar) {
+    private int renderedChunks = 0;
+    private Vector3f waterFogColor = new Vector3f(0.003f, 0.1f, 0.28f);
+    private float waterFogDensity = 0.12f;
+    private float waterTransparency = 0.6f;
+
+    public Renderer(Window window, BlockRegistry registry, float fov, float zNear, float zFar) {
         this.window = window;
+        this.blockRegistry = registry;
         this.fov = fov;
         this.zNear = zNear;
         this.zFar = zFar;
+        this.textureAtlas = new TextureAtlas(16);
 
-        viewMatrix.identity();
-        worldMatrix.identity();
+        //insert all block textures in the atlas
+        for(Block b : blockRegistry.getBlocks()) {
+            for(int f : Faces.ALL) {
+                if(b instanceof MultiTexturedBlock mtb) {
+                    int ovrTextureID =  textureAtlas.insert(mtb.ovrTextureKey(f));
+                    mtb.setOvrTextureID(f, ovrTextureID);
+                }
+                int baseTextureID = textureAtlas.insert(b.textureKey(f));
+                b.setTextureID(f, baseTextureID);
+            }
+        }
 
-        this.blockShader = new Shader();
-        blockShader.createShader("shaders/blockVert.glsl", GL_VERTEX_SHADER);
-        blockShader.createShader("shaders/blockFrag.glsl", GL_FRAGMENT_SHADER);
-        blockShader.link();
+        textureAtlas.generateMipmaps();
 
-        blockShader.createUniform("projMatrix");
-        blockShader.createUniform("viewMatrix");
-        blockShader.createUniform("worldMatrix");
+        this.blockShaderProgram = createShaderProgram("block shader",
+                                                      "shaders/blockVert.glsl",
+                                                      "shaders/blockFrag.glsl");
 
-        blockShader.createUniform("fogColor");
-        blockShader.createUniform("camPos");
-        blockShader.createUniform("isUnderWater");
-        blockShader.createUniform("fogDensity");
+        blockShaderProgram.createUniforms(new String[] {
+                "projMatrix",
+                "viewMatrix",
+                "worldMatrix",
+                "fogColor",
+                "camPos",
+                "isUnderWater",
+                "fogDensity",
+                "texture_sampler",
+                "texture_padding",
+                "texture_size",
+                "atlas_size",
+                "slots_per_row"
+        });
 
-        blockShader.createUniform("texture_sampler");
-        blockShader.createUniform("texture_padding");
-        blockShader.createUniform("texture_size");
-        blockShader.createUniform("atlas_size");
-        blockShader.createUniform("slots_per_row");
-        blockShader.bind();
-        blockShader.setUniform("texture_padding", 16.0f);
-        blockShader.setUniform("texture_size", 16.0f);
-        blockShader.setUniform("atlas_size", 1024.0f);
-        blockShader.setUniform("slots_per_row", (float)(1024 / (16 + 16)));
-        blockShader.unbind();
-
-        this.waterShader = new Shader();
-        waterShader.createShader("shaders/waterVert.glsl", GL_VERTEX_SHADER);
-        waterShader.createShader("shaders/waterFrag.glsl", GL_FRAGMENT_SHADER);
-        waterShader.link();
-
-        waterShader.createUniform("projMatrix");
-        waterShader.createUniform("viewMatrix");
-        waterShader.createUniform("worldMatrix");
-        //waterShader.createUniform("time");
-
-        waterShader.createUniform("fogColor");
-        waterShader.createUniform("camPos");
-        waterShader.createUniform("isUnderWater");
-        waterShader.createUniform("fogDensity");
-        waterShader.createUniform("waterTransparency");
-
-        waterShader.createUniform("texture_sampler");
-        waterShader.createUniform("texture_padding");
-        waterShader.createUniform("texture_size");
-        waterShader.createUniform("atlas_size");
-        waterShader.createUniform("slots_per_row");
-        waterShader.bind();
-        waterShader.setUniform("texture_padding", 16.0f);
-        waterShader.setUniform("texture_size", 16.0f);
-        waterShader.setUniform("atlas_size", 1024.0f);
-        waterShader.setUniform("slots_per_row", (float)(1024 / (16 + 16)));
-        waterShader.unbind();
+        blockShaderProgram.setUniforms(
+                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "texture_sampler", "fogColor", "fogDensity"},
+                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), 0, waterFogColor, waterFogDensity}
+                );
 
 
-        this.lineShader = new Shader();
-        lineShader.createShader("shaders/lineVert.glsl", GL_VERTEX_SHADER);
-        lineShader.createShader("shaders/lineFrag.glsl", GL_FRAGMENT_SHADER);
-        lineShader.createShader("shaders/lineGeom.glsl", GL_GEOMETRY_SHADER);
-        lineShader.link();
+        this.waterShaderProgram = createShaderProgram("water shader",
+                                                      "shaders/waterVert.glsl",
+                                                      "shaders/waterFrag.glsl");
 
-        lineShader.createUniform("projMatrix");
-        lineShader.createUniform("viewMatrix");
-        lineShader.createUniform("worldMatrix");
-        lineShader.createUniform("viewport");
-        lineShader.createUniform("thickness");
+        waterShaderProgram.createUniforms(new String[]{
+                "projMatrix",
+                "viewMatrix",
+                "worldMatrix",
+                "fogColor",
+                "camPos",
+                "isUnderWater",
+                "fogDensity",
+                "waterTransparency",
+                "texture_sampler",
+                "texture_padding",
+                "texture_size",
+                "atlas_size",
+                "slots_per_row"
+        });
+
+        waterShaderProgram.setUniforms(
+                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "waterTransparency", "texture_sampler", "fogColor", "fogDensity"},
+                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), waterTransparency, 0, waterFogColor, waterFogDensity}
+                );
+
+
+        this.lineShaderProgram = createShaderProgram("line shader",
+                                                     "shaders/lineVert.glsl",
+                                                     "shaders/lineFrag.glsl",
+                                                     "shaders/lineGeom.glsl");
+
+        lineShaderProgram.createUniforms(new String[]{
+                "projMatrix",
+                "viewMatrix",
+                "worldMatrix",
+                "viewport",
+                "thickness",
+        });
+
+        lineShaderProgram.setUniforms(new String[]{"thickness"},
+                                       new Object[]{1.5f});
     }
 
     public void render(World world, Player player) {
         Camera cam = player.getCam();
+        Collection<Chunk> chunks = world.getChunks();
+
+        renderedChunks = 0;
 
         viewMatrix = cam.getViewMatrix(viewMatrix);
         projMatrix.identity().perspective(Math.toRadians(fov), (float) window.getWidth() / window.getHeight(), zNear, zFar);
 
         frustum.update(projMatrix, viewMatrix);
+        frustum.cull(chunks);
 
-        blockShader.bind();
-        blockShader.setUniform("projMatrix", projMatrix);
-        blockShader.setUniform("viewMatrix", viewMatrix);
-        blockShader.setUniform("camPos", cam.getPosition());
-        blockShader.unbind();
+        blockShaderProgram.setUniforms(
+                new String[]{"projMatrix", "viewMatrix", "camPos", "isUnderWater"},
+                new Object[]{projMatrix, viewMatrix, cam.getPosition(), world.isPlayerUnderWater() ? 1 : 0});
 
-        waterShader.bind();
-        waterShader.setUniform("projMatrix", projMatrix);
-        waterShader.setUniform("viewMatrix", viewMatrix);
-        waterShader.setUniform("camPos", cam.getPosition());
-        waterShader.unbind();
+        waterShaderProgram.setUniforms(
+                new String[]{"projMatrix", "viewMatrix", "camPos", "isUnderWater"},
+                new Object[]{projMatrix, viewMatrix, cam.getPosition(), world.isPlayerUnderWater() ? 1 : 0});
 
-        world.render(blockShader, waterShader, frustum);
+        lineShaderProgram.setUniforms(
+                new String[]{"projMatrix", "viewMatrix"},
+                new Object[]{projMatrix, viewMatrix}
+                );
 
+        blockShaderProgram.bind();
+        glActiveTexture(GL_TEXTURE0);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+        for(Chunk c : chunks) {
+            //don't render if out of the frustum
+            if(!c.isVisible()) continue;
+
+            //don't render if out of the render distance (not the same as the load distance)
+            //set not visible so we don't test again in the water pass
+            int pcx = (int) floor(player.getPos().x / world.getChunkSize());
+            int pcz = (int) floor(player.getPos().z / world.getChunkSize());
+            if ( abs(c.getChunkX() - pcx) > world.getRenderDistance()) {
+                c.setVisible(false);
+                continue;
+            }
+            if ( abs(c.getChunkZ() - pcz) > world.getRenderDistance()) {
+                c.setVisible(false);
+                continue;
+            }
+
+            worldMatrix.identity().translate(c.getWorldPos());
+
+            blockShaderProgram.setUniform("worldMatrix", worldMatrix);
+            c.renderSolid();
+
+            renderedChunks++;
+        }
+        blockShaderProgram.unbind();
+
+        waterShaderProgram.bind();
+        glActiveTexture(GL_TEXTURE0);
+        glDisable(GL_CULL_FACE);
+        for(Chunk c : chunks) {
+            //don't render if out of the frustum
+            if(!c.isVisible()) continue;
+
+            worldMatrix.identity().translate(c.getWorldPos());
+
+            waterShaderProgram.setUniform("worldMatrix", worldMatrix);
+
+            c.renderWater();
+        }
+        waterShaderProgram.unbind();
+
+        drawBlockOutline(world, player);
+    }
+
+    private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {
+        ShaderProgram program = new ShaderProgram(name);
+        program.addShader(vertPath, GL_VERTEX_SHADER);
+
+        for(String path : extraPaths) {
+            program.addShader(path, GL_GEOMETRY_SHADER);
+        }
+
+        program.addShader(fragPath, GL_FRAGMENT_SHADER);
+
+        program.link();
+
+        return program;
+    }
+
+    private void drawBlockOutline(World world, Player player) {
         //targeted block outline
         RayCaster caster = new RayCaster(world);
-        RayCastResult result = caster.castRay(player.getEyePos(), cam.getFront(), player.getReach());
+        RayCastResult result = caster.castRay(player.getEyePos(), player.getCam().getFront(), player.getReach());
 
-        if(result.hit()) {
-            lineShader.bind();
+        if(!result.hit()) return;
 
-            lineShader.setUniform("projMatrix", projMatrix);
-            lineShader.setUniform("viewMatrix", viewMatrix);
-            Matrix4f worldMatrix = new Matrix4f();
-            Vector3i wPos = result.targetPos();
-            worldMatrix.identity()
-                    .translate(wPos.x + 0.5f, wPos.y + 0.5f, wPos.z + 0.5f)
-                    .scale(1.0f + BlockOutline.EPS)
-                    .translate(-0.5f, -0.5f, -0.5f);
-            lineShader.setUniform("worldMatrix", worldMatrix);
+        //compute world matrix
+        Matrix4f worldMatrix = new Matrix4f();
+        Vector3i wPos = result.targetPos();
+        worldMatrix.identity()
+                   .translate(wPos.x + 0.5f, wPos.y + 0.5f, wPos.z + 0.5f)
+                   .scale(1.0f + BlockOutline.EPS)
+                   .translate(-0.5f, -0.5f, -0.5f);
+        Vector2f viewport = new Vector2f(window.getWidth(), window.getHeight());
 
-            lineShader.setUniform("viewport", new Vector2f(window.getWidth(), window.getHeight()));
-            lineShader.setUniform("thickness", 1.5f);
+        lineShaderProgram.bind();
+        lineShaderProgram.setUniforms(new String[]{"worldMatrix", "viewport"},
+                                      new Object[]{worldMatrix, viewport});
 
-            glDisable(GL_CULL_FACE);
-            outline.render();
-            glEnable(GL_CULL_FACE);
+        outline.render();
 
-            lineShader.unbind();
-        }
+        lineShaderProgram.unbind();
+    }
+
+    public TextureAtlas getTextureAtlas() {
+        return textureAtlas;
     }
 
     public void setzNear(float zNear) {
@@ -172,5 +265,25 @@ public class Renderer {
 
     public float getFov() {
         return fov;
+    }
+
+    public int getRenderedChunks() {
+        return renderedChunks;
+    }
+
+    public float getWaterFogDensity() {
+        return waterFogDensity;
+    }
+
+    public void setWaterFogDensity(float val) {
+        waterFogDensity = val;
+    }
+
+    public float getWaterTransparency() {
+        return waterTransparency;
+    }
+
+    public void setWaterTransparency(float val) {
+        waterTransparency = val;
     }
 }

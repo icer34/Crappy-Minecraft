@@ -67,8 +67,8 @@ public class GUI {
         this.imGuiGlfw = new ImGuiImplGlfw();
         this.imGuiGl3 = new ImGuiImplGl3();
 
-        this.waterFogDensity = world.getWaterFogDensity();
-        this.waterTransparency = world.getWaterTransparency();
+        this.waterFogDensity = renderer.getWaterFogDensity();
+        this.waterTransparency = renderer.getWaterTransparency();
 
         this.sens = cam.getSens();
         this.flySpeed = player.getFlySpeed();
@@ -117,7 +117,7 @@ public class GUI {
 
         ImGui.text("Loaded chunks: " + world.getLoadedChunks());
 
-        ImGui.text("Rendered chunks: " + world.getRenderedChunks());
+        ImGui.text("Rendered chunks: " + renderer.getRenderedChunks());
 
         ImGui.text("Selected block: " + player.getSelectedBlock());
 
@@ -202,13 +202,13 @@ public class GUI {
         float[] waterFogDensityArray = {waterFogDensity};
         if (ImGui.sliderFloat("Water fog density", waterFogDensityArray, 0.01f, 0.5f)) {
             waterFogDensity = waterFogDensityArray[0];
-            world.setWaterFogDensity(waterFogDensity);
+            renderer.setWaterFogDensity(waterFogDensity);
         }
 
         float[] waterTransparencyArray = {waterTransparency};
         if (ImGui.sliderFloat("Water transparency", waterTransparencyArray, 0.0f, 1.0f)) {
             waterTransparency = waterTransparencyArray[0];
-            world.setWaterTransparency(waterTransparency);
+            renderer.setWaterTransparency(waterTransparency);
         }
     }
 
@@ -269,7 +269,7 @@ public class GUI {
                 ImGui.endTabItem();
             }
 
-            if(ImGui.beginTabItem("Shader")) {
+            if(ImGui.beginTabItem("ShaderProgram")) {
                 renderShaderSettings();
                 ImGui.endTabItem();
             }

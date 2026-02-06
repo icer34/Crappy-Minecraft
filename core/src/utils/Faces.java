@@ -8,5 +8,9 @@ public final class Faces {
     public static final int TOP    = 4;
     public static final int BOTTOM  = 5;
 
+    public static final int[] ALL = {
+            NORTH, SOUTH, EAST, WEST, TOP, BOTTOM
+    };
+
     private Faces() {}
 }

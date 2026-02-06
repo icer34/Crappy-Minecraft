@@ -14,13 +14,11 @@ public class ChunkMesher {
     private final int CHUNK_SIZE;
     private final int MAX_HEIGHT;
     private final BlockRegistry registry;
-    private final TextureAtlas atlas;
 
-    public ChunkMesher(int size, int maxHeight, BlockRegistry registry, TextureAtlas atlas) {
+    public ChunkMesher(int size, int maxHeight, BlockRegistry registry) {
         this.CHUNK_SIZE = size;
         this.MAX_HEIGHT = maxHeight;
         this.registry = registry;
-        this.atlas = atlas;
     }
 
     public ChunkMeshData generateChunkMesh(Map<Long, Chunk> chunks, int[] blockIDs, int chunkX, int chunkZ, boolean isPacked) {

@@ -3,15 +3,14 @@ package world;
 import blocks.*;
 import graphics.*;
 import org.joml.*;
+import org.w3c.dom.Text;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.*;
 
 import static org.joml.Math.*;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 public class World {
 
@@ -28,126 +27,36 @@ public class World {
     private float TIME_SPEED = (float)(2 * PI / 1000.0f);
 
     private int seaLvl = 30;
-    private Vector3f waterFogColor = new Vector3f(0.003f, 0.1f, 0.28f);
-    private float waterFogDensity = 0.12f;
-    private float waterTransparency = 0.6f;
     private boolean isUnderWater = false;
 
     private final TerrainGenerator terrainGenerator;
-
-    private final BlockRegistry blockRegistry = new BlockRegistry();
-
-    private final TextureAtlas textureAtlas = new TextureAtlas(16);
-
-    private final ChunkMesher chunkMesh = new ChunkMesher(CHUNK_SIZE, MAX_HEIGHT, blockRegistry, textureAtlas);
+    private final BlockRegistry blockRegistry;
+    private final ChunkMesher chunkMesher;
 
     //chunks that are ready to be rendered
     Map<Long, Chunk> chunks = new ConcurrentHashMap<>();
-    private int renderedChunks = 0;
+
     //chunks requested to be rendered
     Queue<ChunkBuildResult> ready = new ConcurrentLinkedQueue<>();
+
     //chunks currently being loaded
     Map<Long, Boolean> inFlight = new ConcurrentHashMap<>();
 
-    private Matrix4f worldMatrix = new Matrix4f();
-
-    private Vector3f playerPos;
-
     public World(long seed) {
         //setup block registry
+        blockRegistry = new BlockRegistry();
         //(scan all blocks, add them to the registry) -> JSON ? java files scan ? ...?
         blockRegistry.insert(new AirBlock());
         blockRegistry.insert(new StoneBlock());
         blockRegistry.insert(new GrassBlock());
         blockRegistry.insert(new WaterBlock());
 
-        //setup texture atlas
-        for(Block b : blockRegistry.getBlocks()) {
-            for(int face = 0; face < 6; face++) {
-                if(b instanceof MultiTexturedBlock mt) {
-                    int ovrTextureSlotID = textureAtlas.insert(mt.ovrTextureKey(face));
-                    mt.setOvrTextureID(face, ovrTextureSlotID);
-                }
-                int textureSlotID = textureAtlas.insert(b.textureKey(face));
-                b.setTextureID(face, textureSlotID);
-            }
-        }
-        textureAtlas.generateMipmaps();
+        this.chunkMesher = new ChunkMesher(CHUNK_SIZE, MAX_HEIGHT, blockRegistry);
 
         this.terrainGenerator = new TerrainGenerator(seed, MAX_HEIGHT, CHUNK_SIZE, blockRegistry);
     }
 
-    public void render(Shader blockShader, Shader waterShader, Frustum frustum) {
-
-        if(isUnderWater) {
-            glClearColor(waterFogColor.x, waterFogColor.y, waterFogColor.z, 1.0f);
-        } else {
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        }
-
-        blockShader.bind();
-        blockShader.setUniform("texture_sampler", 0);
-        blockShader.setUniform("fogColor", waterFogColor);
-        blockShader.setUniform("fogDensity", waterFogDensity);
-        blockShader.setUniform("isUnderWater", isUnderWater ? 1 : 0);
-        glActiveTexture(GL_TEXTURE0);
-        blockShader.unbind();
-
-        waterShader.bind();
-        //waterShader.setUniform("time", (float) GLFW.glfwGetTime());
-        waterShader.setUniform("texture_sampler", 0);
-        waterShader.setUniform("fogColor", waterFogColor);
-        waterShader.setUniform("fogDensity", waterFogDensity);
-        waterShader.setUniform("isUnderWater", isUnderWater ? 1 : 0);
-        waterShader.setUniform("waterTransparency", waterTransparency);
-        glActiveTexture(GL_TEXTURE0);
-        waterShader.unbind();
-
-        frustum.cull(chunks);
-
-        renderedChunks = 0;
-
-        for(long key : chunks.keySet()) {
-            Chunk c = chunks.get(key);
-
-            if(!c.isVisible()) continue;
-
-            int pcx = (int) floor(playerPos.x / CHUNK_SIZE);
-            int pcz = (int) floor(playerPos.z / CHUNK_SIZE);
-            if ( abs(c.getChunkX() - pcx) > RENDER_DISTANCE) continue;
-            if ( abs(c.getChunkZ() - pcz) > RENDER_DISTANCE) continue;
-
-            worldMatrix.identity().translate(c.getWorldPos());
-
-            blockShader.bind();
-            blockShader.setUniform("worldMatrix", worldMatrix);
-            c.renderSolid();
-            blockShader.unbind();
-
-            renderedChunks++;
-        }
-
-        for(long key : chunks.keySet()) {
-            Chunk c = chunks.get(key);
-
-            if(!c.isVisible()) continue;
-
-            int pcx = (int) floor(playerPos.x / CHUNK_SIZE);
-            int pcz = (int) floor(playerPos.z / CHUNK_SIZE);
-            if ( abs(c.getChunkX() - pcx) > RENDER_DISTANCE) continue;
-            if ( abs(c.getChunkZ() - pcz) > RENDER_DISTANCE) continue;
-
-            worldMatrix.identity().translate(c.getWorldPos());
-
-            waterShader.bind();
-            waterShader.setUniform("worldMatrix", worldMatrix);
-            c.renderWater();
-            waterShader.unbind();
-        }
-    }
-
     public void update(Vector3f playerPos, float deltaTime) {
-        this.playerPos = playerPos;
         isUnderWater = (playerPos.y + 1.8f <= seaLvl &&
                         playerPos.y + 1.8f > getGroundHeight((int) floor(playerPos.x), (int) floor(playerPos.z)));
 
@@ -204,7 +113,7 @@ public class World {
                         try{
                             int[] blocks = terrainGenerator.generateChunk(cx, cz);
 
-                            ChunkMeshData mesh = chunkMesh.generateChunkMesh(chunks, blocks, cx, cz, true);
+                            ChunkMeshData mesh = chunkMesher.generateChunkMesh(chunks, blocks, cx, cz, true);
 
                             ready.add(new ChunkBuildResult(cx, cz, blocks, mesh));
                         } catch (Exception e) {
@@ -245,7 +154,7 @@ public class World {
         Chunk c = chunks.get(getChunkID(cx, cz));
         if (c == null) return;
 
-        ChunkMeshData mesh = chunkMesh.generateChunkMesh(chunks, c.getBlocks(), cx, cz, true);
+        ChunkMeshData mesh = chunkMesher.generateChunkMesh(chunks, c.getBlocks(), cx, cz, true);
 
         c.updateMeshes(mesh);
     }
@@ -322,26 +231,6 @@ public class World {
         return chunks.size();
     }
 
-    public int getRenderedChunks() {
-        return renderedChunks;
-    }
-
-    public float getWaterFogDensity() {
-        return waterFogDensity;
-    }
-
-    public void setWaterFogDensity(float waterFogDensity) {
-        this.waterFogDensity = waterFogDensity;
-    }
-
-    public float getWaterTransparency() {
-        return waterTransparency;
-    }
-
-    public void setWaterTransparency(float waterTransparency) {
-        this.waterTransparency = waterTransparency;
-    }
-
     public int getSeaLvl() {
         return seaLvl;
     }
@@ -398,7 +287,24 @@ public class World {
     public int getBlockID(String name) {
         return blockRegistry.idFromName(name);
     }
+
     public Block getBlock(String name) {
         return blockRegistry.blockFromName(name);
+    }
+
+    public BlockRegistry getBlockRegistry() {
+        return blockRegistry;
+    }
+
+    public Collection<Chunk> getChunks() {
+        return chunks.values();
+    }
+
+    public int getChunkSize() {
+        return CHUNK_SIZE;
+    }
+
+    public boolean isPlayerUnderWater() {
+        return isUnderWater;
     }
 }

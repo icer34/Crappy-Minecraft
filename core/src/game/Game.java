@@ -57,9 +57,9 @@ public class Game implements IApplication {
         window = new Window("Crappy Minecraft", 1600, 900, false);
         window.init(input = new Input());
 
-        renderer = new Renderer(window, 80.0f, 0.001f, 1000.0f);
-
         world = new World(0);
+
+        renderer = new Renderer(window, world.getBlockRegistry(), 80.0f, 0.001f, 1000.0f);
 
         player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f) + 5.0f, 0.0f));
         playerManager = new PlayerManager();

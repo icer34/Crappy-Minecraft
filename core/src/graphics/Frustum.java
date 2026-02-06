@@ -5,6 +5,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import world.Chunk;
 
+import java.util.Collection;
 import java.util.Map;
 
 import static org.joml.Math.*;
@@ -20,9 +21,8 @@ public class Frustum {
     // near - far - left - right - top - bottom
     private Vector4f[] planes = new Vector4f[6];
 
-    public void cull(Map<Long, Chunk> chunks) {
-        for(long key : chunks.keySet()) {
-            Chunk c = chunks.get(key);
+    public void cull(Collection<Chunk> chunks) {
+        for(Chunk c : chunks) {
 
             Vector3f minBox = new Vector3f(c.getChunkX() * c.getSize(), 0.0f, c.getChunkZ() * c.getSize());
             Vector3f maxBox = new Vector3f((c.getChunkX() + 1) * c.getSize(), c.getMaxHeight(), (c.getChunkZ() + 1) * c.getSize());

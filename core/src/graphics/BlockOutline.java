@@ -51,9 +51,11 @@ public class BlockOutline {
 
     public void render() {
         glBindVertexArray(vao);
+        glDisable(GL_CULL_FACE);
 
         glDrawArrays(GL_LINES, 0, 24);
 
+        glEnable(GL_CULL_FACE);
         glBindVertexArray(0);
     }
 }
