@@ -11,7 +11,8 @@
 ## Graphics
 ### General
 - [ ] Fill all the addFace() methods in the ChunkMesher (different data layout for water and solid)
-- [ ] Add tint param in vertex data (both water and solid)
+- [ ] LUT texture for tints
+- [ ] Texture of biomeID for each chunk
 - [ ] Add a player model (with skin support ?)
 - [ ] Water texture animation
   - [ ] Different shader for default water and realistic water
@@ -32,7 +33,8 @@
 ## Terrain
 - [x] Perlin noise
 - [x] Underwater fog effects
-- [ ] Biomes, generate terrain differently per biome minecraft-like: (cfr. https://www.youtube.com/watch?v=CSa5O6knuwI)
+- [ ] Biome support
+- [ ] Generate terrain differently per biome minecraft-like: (cfr. https://www.youtube.com/watch?v=CSa5O6knuwI)
   - Continentalness and other indices
   - Heatmap for humidity
   - ...

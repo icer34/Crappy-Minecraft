@@ -15,6 +15,7 @@ public class Chunk {
     private int chunkX, chunkZ;
 
     int[] blocks;
+    byte[][] biomeMap;
 
     private boolean isVisible = true;
 
@@ -27,6 +28,7 @@ public class Chunk {
         this.SIZE = size;
         this.MAX_HEIGHT = maxHeight;
         this.blocks = new int[SIZE * SIZE * MAX_HEIGHT];
+        this.biomeMap = new byte[SIZE][SIZE];
         this.solidMesh = new PackedMesh();
         this.waterMesh = new PackedMesh();
     }
@@ -50,6 +52,18 @@ public class Chunk {
         if(!isValidCoord(localPos.x, localPos.y, localPos.z))
             throw new RuntimeException("Trying to set block to illegal coords: " + localPos);
         blocks[getIdx(localPos.x, localPos.y, localPos.z)] = blockID;
+    }
+
+    public void setBiomeMap(byte[][] biomeMap) {
+        this.biomeMap = biomeMap;
+    }
+
+    public byte getBiomeAt(int lx, int lz) {
+        return biomeMap[lx][lz];
+    }
+
+    public byte[][] getBiomeMap() {
+        return biomeMap;
     }
 
     private boolean isValidCoord(int x, int y, int z) {

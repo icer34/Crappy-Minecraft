@@ -22,7 +22,7 @@ public class World {
     private final ExecutorService pool  = Executors.newFixedThreadPool(MAX_THREADS);
 
     private int RENDER_DISTANCE = 12;
-    private int LOAD_DISTANCE = RENDER_DISTANCE;
+    private int LOAD_DISTANCE = RENDER_DISTANCE + 1;
 
     private float TIME_SPEED = (float)(2 * PI / 1000.0f);
 
@@ -133,6 +133,8 @@ public class World {
             long id = getChunkID(result.chunkX(), result.chunkZ());
 
             Chunk c = new Chunk(result.chunkX(), result.chunkZ(), CHUNK_SIZE, MAX_HEIGHT);
+
+            c.setBiomeMap(terrainGenerator.generateBiomeMap(c.getChunkX(), c.getChunkZ()));
 
             c.setBlockIDs(result.blocks());
 
@@ -259,6 +261,25 @@ public class World {
                                      (int) floor(pos.z));
 
         return getBlockAt(wPos);
+    }
+
+    public byte getBiomeAt(Vector3i pos) {
+        int wx = pos.x;
+        int wy = pos.y;
+        int wz = pos.z;
+
+        if (wy < 0 || wy >= MAX_HEIGHT) return -1;
+
+        int cx = (int) floor((float)wx / CHUNK_SIZE);
+        int cz = (int) floor((float)wz / CHUNK_SIZE);
+
+        Chunk c = chunks.get(getChunkID(cx, cz));
+        if (c == null) return -1;
+
+        int lx = wx - cx * CHUNK_SIZE;
+        int lz = wz - cz * CHUNK_SIZE;
+
+        return c.getBiomeAt(lx, lz);
     }
 
     public Block getBlockAt(Vector3i pos) {

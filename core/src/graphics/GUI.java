@@ -146,6 +146,8 @@ public class GUI {
         boolean freeCam = player.isFreeCam();
         ImGui.text("Free cam toggled: " + freeCam);
 
+        ImGui.text("Biome: " + world.getBiomeAt(player.getBlockPos()));
+
         ImGui.end();
     }
 

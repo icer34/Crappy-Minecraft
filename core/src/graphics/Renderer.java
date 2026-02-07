@@ -40,6 +40,7 @@ public class Renderer {
     private float fov;
 
     private int renderedChunks = 0;
+
     private Vector3f waterFogColor = new Vector3f(0.003f, 0.1f, 0.28f);
     private float waterFogDensity = 0.12f;
     private float waterTransparency = 0.6f;
@@ -52,7 +53,7 @@ public class Renderer {
         this.zFar = zFar;
         this.textureAtlas = new TextureAtlas(16);
 
-        //insert all block textures in the atlas
+        //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
             for(int f : Faces.ALL) {
                 if(b instanceof MultiTexturedBlock mtb) {
@@ -65,6 +66,10 @@ public class Renderer {
         }
 
         textureAtlas.generateMipmaps();
+
+        //generate LUT texture for the different tints a block could have
+        // ex: a grass block in tundra is not the same color as in plains
+        //TODO
 
         this.blockShaderProgram = createShaderProgram("block shader",
                                                       "shaders/blockVert.glsl",
@@ -180,6 +185,9 @@ public class Renderer {
                 continue;
             }
 
+            //create and upload biomeMap texture
+            //TODO
+
             worldMatrix.identity().translate(c.getWorldPos());
 
             blockShaderProgram.setUniform("worldMatrix", worldMatrix);
@@ -245,10 +253,6 @@ public class Renderer {
         outline.render();
 
         lineShaderProgram.unbind();
-    }
-
-    public TextureAtlas getTextureAtlas() {
-        return textureAtlas;
     }
 
     public void setzNear(float zNear) {

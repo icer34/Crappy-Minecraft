@@ -70,6 +70,16 @@ public class TerrainGenerator {
         return blocks;
     }
 
+    public byte[][] generateBiomeMap(int cx, int cz) {
+        byte[][] map = new byte[CHUNK_SIZE][CHUNK_SIZE];
+        for(int i = 0; i < CHUNK_SIZE; i++) {
+            for(int j = 0; j < CHUNK_SIZE; j++) {
+                    map[i][j] = 0;
+            }
+        }
+
+        return map;
+    }
 
     public int getHeight(int wx, int wz) {
         float noise = terrainNoise.fractalNoise(wx * scale, wz * scale, octaves, lacunarity, gain);

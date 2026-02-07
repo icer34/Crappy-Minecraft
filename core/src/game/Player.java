@@ -2,6 +2,7 @@ package game;
 
 import graphics.Camera;
 import org.joml.Vector3f;
+import org.joml.Vector3i;
 
 public class Player {
 
@@ -170,6 +171,10 @@ public class Player {
 
     public Vector3f getPos() {
         return pos;
+    }
+
+    public Vector3i getBlockPos() {
+        return new Vector3i((int) pos.x, (int) pos.y, (int) pos.z);
     }
 
     public Camera getCam() {
