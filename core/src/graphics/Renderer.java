@@ -23,7 +23,10 @@ public class Renderer {
 
     private final Window window;
     private final BlockRegistry blockRegistry;
+
     private final TextureAtlas textureAtlas;
+    private final BiomeMapTexture biomeMapTexture;
+    private final TintTexture tintTexture;
 
     private ShaderProgram blockShaderProgram;
     private ShaderProgram waterShaderProgram;
@@ -64,12 +67,15 @@ public class Renderer {
                 b.setTextureID(f, baseTextureID);
             }
         }
-
         textureAtlas.generateMipmaps();
 
-        //generate LUT texture for the different tints a block could have
-        // ex: a grass block in tundra is not the same color as in plains
-        //TODO
+
+        //allocate GPU memory for the biomeMap textures
+        this.biomeMapTexture = new BiomeMapTexture();
+
+
+        //create tint texture according to biome data
+        this.tintTexture = new TintTexture();
 
         this.blockShaderProgram = createShaderProgram("block shader",
                                                       "shaders/blockVert.glsl",
@@ -83,7 +89,9 @@ public class Renderer {
                 "camPos",
                 "isUnderWater",
                 "fogDensity",
-                "texture_sampler",
+                "textureAtlas",
+                "biomeMapTex",
+                "tintTexture",
                 "texture_padding",
                 "texture_size",
                 "atlas_size",
@@ -91,8 +99,8 @@ public class Renderer {
         });
 
         blockShaderProgram.setUniforms(
-                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "texture_sampler", "fogColor", "fogDensity"},
-                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), 0, waterFogColor, waterFogDensity}
+                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "textureAtlas", "biomeMapTex", "tintTexture", "fogColor", "fogDensity"},
+                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), 0, 1, 2, waterFogColor, waterFogDensity}
                 );
 
 
@@ -109,7 +117,9 @@ public class Renderer {
                 "isUnderWater",
                 "fogDensity",
                 "waterTransparency",
-                "texture_sampler",
+                "textureAtlas",
+                "biomeMapTex",
+                "tintTexture",
                 "texture_padding",
                 "texture_size",
                 "atlas_size",
@@ -117,8 +127,8 @@ public class Renderer {
         });
 
         waterShaderProgram.setUniforms(
-                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "waterTransparency", "texture_sampler", "fogColor", "fogDensity"},
-                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), waterTransparency, 0, waterFogColor, waterFogDensity}
+                new String[]{"texture_padding", "texture_size", "atlas_size", "slots_per_row", "waterTransparency", "textureAtlas", "biomeMapTex", "tintTexture", "fogColor", "fogDensity"},
+                new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), waterTransparency, 0, 1, 2, waterFogColor, waterFogDensity}
                 );
 
 
@@ -165,9 +175,16 @@ public class Renderer {
                 );
 
         blockShaderProgram.bind();
+
         glActiveTexture(GL_TEXTURE0);
+        textureAtlas.bind();
+
+        glActiveTexture(GL_TEXTURE2);
+        tintTexture.bind();
+
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
+
         for(Chunk c : chunks) {
             //don't render if out of the frustum
             if(!c.isVisible()) continue;
@@ -185,8 +202,9 @@ public class Renderer {
                 continue;
             }
 
-            //create and upload biomeMap texture
-            //TODO
+            glActiveTexture(GL_TEXTURE1);
+            biomeMapTexture.bind();
+            biomeMapTexture.update(c);
 
             worldMatrix.identity().translate(c.getWorldPos());
 
@@ -199,6 +217,7 @@ public class Renderer {
 
         waterShaderProgram.bind();
         glActiveTexture(GL_TEXTURE0);
+        textureAtlas.bind();
         glDisable(GL_CULL_FACE);
         for(Chunk c : chunks) {
             //don't render if out of the frustum

@@ -42,7 +42,7 @@ public class PackedMesh implements Mesh{
 
         glVertexAttribIPointer(0, 1, GL_UNSIGNED_INT, 2 * Integer.BYTES, 0);
         glEnableVertexAttribArray(0);
-        glVertexAttribIPointer(1, 1, GL_UNSIGNED_SHORT, 2 * Integer.BYTES, Integer.BYTES);
+        glVertexAttribIPointer(1, 1, GL_UNSIGNED_INT, 2 * Integer.BYTES, Integer.BYTES);
         glEnableVertexAttribArray(1);
 
         glBindBuffer(GL_VERTEX_ARRAY, 0);

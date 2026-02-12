@@ -52,6 +52,8 @@ out vec3 vNorm;
 out vec2 vBaseUV;
 out vec2 vOvrUV;
 out vec3 vWorldPos;
+out vec2 vLocalPos;
+flat out uint vTintIdx;
 
 vec4 getUV(uint textureID) {
     uint slotx = textureID % uint(slots_per_row);
@@ -73,8 +75,10 @@ void main() {
     uint face = (aData >> 12) & 0x7u;
     uint corner = (aData >> 10) & 0x3u;
     uint textureID = aData & 0x3FFu;
-    uint ovrTextureID = (aData2 >> 6) & 0x3FFu;
-    uint flags = aData2 & 0x3Fu;
+
+    uint ovrTextureID = (aData2 >> 22) & 0x3FFu;
+    uint tintIdx = (aData2 >> 19) & 0x7u;
+    uint flags = aData2 & 0x7FFFFu;
 
     vec4 baseUV = getUV(textureID);
     vec4 ovrUV = getUV(ovrTextureID);
@@ -101,5 +105,7 @@ void main() {
     vec3 pos = vec3(x, y, z) + POS[idx];
     vNorm = NORMALS[face];
     vWorldPos = (worldMatrix * vec4(pos, 1.0f)).xyz;
+    vLocalPos = vec2(x, z);
+    vTintIdx = tintIdx;
     gl_Position = projMatrix * viewMatrix * worldMatrix * vec4(pos, 1.0f);
 }

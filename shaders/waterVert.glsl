@@ -52,6 +52,7 @@ vec3(0,-1,0)    //face 5
 out vec3 vNorm;
 out vec2 vUV;
 out vec3 vWorldPos;
+out vec2 vLocalPos;
 
 void main() {
     //unpack data
@@ -61,7 +62,9 @@ void main() {
     uint face = (aData >> 12) & 0x7u;
     uint corner = (aData >> 10) & 0x3u;
     uint textureID = aData & 0x3FFu;
-    uint ovrTextureID = (aData2 >> 6) & 0x3FFu;
+
+    uint ovrTextureID = (aData2 >> 22) & 0x3FFu;
+    uint tintIdx = (aData2 >> 19) & 0x7u;
     uint flags = aData2 & 0x3Fu;
 
     //uv coords computation
@@ -92,6 +95,7 @@ void main() {
     uint idx = 4u * face + corner;
     vec3 pos = vec3(x, y, z) + POS[idx];
     pos.y -= 0.15;
+    vLocalPos = vec2(x, z);
 
     vWorldPos = (worldMatrix * vec4(pos, 1.0f)).xyz;
     gl_Position = projMatrix * viewMatrix * worldMatrix * vec4(pos, 1.0f);

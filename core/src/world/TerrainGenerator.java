@@ -74,7 +74,7 @@ public class TerrainGenerator {
         byte[][] map = new byte[CHUNK_SIZE][CHUNK_SIZE];
         for(int i = 0; i < CHUNK_SIZE; i++) {
             for(int j = 0; j < CHUNK_SIZE; j++) {
-                    map[i][j] = 0;
+                map[i][j] = 0;
             }
         }
 

@@ -105,7 +105,7 @@ public class ShaderProgram {
 
         int loc = glGetUniformLocation(programID, name);
         if(loc < 0)
-            throw new RuntimeException("Could not find uniform: " + name);
+            System.out.println("WARNING: uniform \"" + name + "\" is optimised/deleted");
         uniforms.put(name, loc);
     }
 

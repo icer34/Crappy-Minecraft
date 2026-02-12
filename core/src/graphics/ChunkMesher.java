@@ -1,7 +1,9 @@
 package graphics;
 
 import blocks.Block;
+import blocks.GrassBlock;
 import blocks.MultiTexturedBlock;
+import blocks.WaterBlock;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import world.BlockRegistry;
@@ -131,12 +133,15 @@ public class ChunkMesher {
     {
         //we pack data of a vertex in a 32-bit integer + a 16-bit short
         //data format: x - y - z - faceIdx - cornerIdx - textureID -> in bits: 4 - 9 - 4 - 3 - 2 - 10 = 32
-        //             textureOverlayID - flags -> 10 - 6 = 16
+        //             textureOverlayID - tintIdx - flags -> 10 - 3 - 19 = 32
 
         Block b = registry.blockFromID(blockID);
         int textureID = b.getTextureID(face);
         int ovrTextureID = -1;
         if(b instanceof MultiTexturedBlock mt) ovrTextureID = mt.getOvrTextureID(face);
+        int tintIdx = -1;
+        if(b instanceof GrassBlock) tintIdx = 0;
+        else if(b instanceof WaterBlock) tintIdx = 1;
         int flags = 0;
 
         for(int corner = 0; corner < 4; corner++) {
@@ -147,7 +152,8 @@ public class ChunkMesher {
                        (corner << 10)  |
                        (textureID);
 
-            int data2 = ((ovrTextureID << 6) |
+            int data2 = ((ovrTextureID << 22) |
+                         (tintIdx << 19) |
                           (flags));
 
             verts.add(Float.intBitsToFloat(data1));

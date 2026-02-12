@@ -36,9 +36,6 @@ public class TextureAtlas {
         this.atlasID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, atlasID);
 
-        float max = glGetFloat(0x84FF); // GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT
-        glTexParameterf(GL_TEXTURE_2D, 0x84FE, Math.min(8.0f, max)); // GL_TEXTURE_MAX_ANISOTROPY_EXT
-
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
@@ -53,9 +50,13 @@ public class TextureAtlas {
                      GL_RGBA,
                      GL_UNSIGNED_BYTE,
                      (ByteBuffer) null);
+
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public int insert(String textureKey) {
+        bind();
+
         if(texturesSlots.containsKey(textureKey)) {
             return texturesSlots.get(textureKey);
         }
