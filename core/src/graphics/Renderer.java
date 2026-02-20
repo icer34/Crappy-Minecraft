@@ -25,7 +25,6 @@ public class Renderer {
     private final BlockRegistry blockRegistry;
 
     private final TextureAtlas textureAtlas;
-    private final BiomeMapTexture biomeMapTexture;
     private final TintTexture tintTexture;
 
     private ShaderProgram blockShaderProgram;
@@ -68,11 +67,6 @@ public class Renderer {
             }
         }
         textureAtlas.generateMipmaps();
-
-
-        //allocate GPU memory for the biomeMap textures
-        this.biomeMapTexture = new BiomeMapTexture();
-
 
         //create tint texture according to biome data
         this.tintTexture = new TintTexture();
@@ -202,9 +196,9 @@ public class Renderer {
                 continue;
             }
 
+            c.updateBiomeMapTexture();
             glActiveTexture(GL_TEXTURE1);
-            biomeMapTexture.bind();
-            biomeMapTexture.update(c);
+            c.bindBiomeMapTexture();
 
             worldMatrix.identity().translate(c.getWorldPos());
 

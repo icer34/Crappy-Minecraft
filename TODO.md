@@ -1,7 +1,7 @@
 # Crappy Minecraft - TODO List
 
 ## Optimisations
-- [ ] Change biomeMap texture: upload texture once to GPU at chunk creation, store texID in chunk and bind to it before rendering
+- [x] Change biomeMap texture: upload texture once to GPU at chunk creation, store texID in chunk and bind to it before rendering
 - [ ] Implement LODs (Distant Horizons type shit)
 - [x] Pack data in fewer bits
   - x, y, z, faceIdx, cornerIdx, textureID in a 32-bit integer

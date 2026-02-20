@@ -1,9 +1,8 @@
 package world;
 
-import blocks.*;
+import graphics.BiomeMapTexture;
 import graphics.ChunkMeshData;
 import graphics.PackedMesh;
-import graphics.StandardMesh;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
@@ -15,7 +14,10 @@ public class Chunk {
     private int chunkX, chunkZ;
 
     int[] blocks;
+
     byte[][] biomeMap;
+    private boolean biomeMapDirty = true;
+    private final BiomeMapTexture biomeMapTexture;
 
     private boolean isVisible = true;
 
@@ -31,6 +33,7 @@ public class Chunk {
         this.biomeMap = new byte[SIZE][SIZE];
         this.solidMesh = new PackedMesh();
         this.waterMesh = new PackedMesh();
+        this.biomeMapTexture = new BiomeMapTexture();
     }
 
     public void renderSolid() {
@@ -123,5 +126,16 @@ public class Chunk {
 
     public int getMaxHeight() {
         return MAX_HEIGHT;
+    }
+
+    public void bindBiomeMapTexture() {
+        this.biomeMapTexture.bind();
+    }
+
+    public void updateBiomeMapTexture() {
+        if(!biomeMapDirty) return;
+
+        biomeMapTexture.update(this);
+        biomeMapDirty = false;
     }
 }
