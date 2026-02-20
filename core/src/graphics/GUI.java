@@ -137,9 +137,6 @@ public class GUI {
         String s5 = String.format("Target Block x: %d y: %d z: %d", pos2.x, pos2.y, pos2.z);
         ImGui.text(s5);
 
-        int groundHeight = world.getGroundHeight((int)pos.x, (int)pos.z);
-        ImGui.text("Ground height: " + groundHeight);
-
         Direction dir = cam.getCardinalDirection();
         ImGui.text("Facing: " + dir.toString());
 
