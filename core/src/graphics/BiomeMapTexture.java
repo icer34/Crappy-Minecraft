@@ -37,8 +37,6 @@ public class BiomeMapTexture {
     }
 
     public void update(Chunk c) {
-        bind();
-
         int chunkSize = c.getSize();
         byte[][] biomeMap = c.getBiomeMap();
 

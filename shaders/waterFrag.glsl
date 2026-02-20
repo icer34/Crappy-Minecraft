@@ -17,12 +17,17 @@ uniform sampler2D tintTexture;
 
 out vec4 FragColor;
 
-float saturate(float x) { return clamp(x, 0.0, 1.0); }
-
 void main() {
     vec3 albedo = texture(textureAtlas, vUV).rgb;
 
     vec3 color = albedo;
+
+    uint biomeID = texelFetch(biomeMapTex, ivec2(vLocalPos.xy), 0).r;
+    vec3 tintColor = texelFetch(
+        tintTexture,
+        ivec2(int(biomeID), 1),
+        0
+    ).rgb;
 
     if(isUnderWater == 1) {
         float dist = distance(camPos, vWorldPos);
@@ -32,13 +37,6 @@ void main() {
 
         color = mix(color, fogColor, fogFactor);
     }
-
-    uint biomeID = texelFetch(biomeMapTex, ivec2(vLocalPos.xy), 0).r;
-    vec3 tintColor = texelFetch(
-        tintTexture,
-        ivec2(int(biomeID), int(1)),
-        0
-    ).rgb;
 
     FragColor = vec4(color * tintColor, waterTransparency);
 }

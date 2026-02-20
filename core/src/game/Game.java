@@ -26,7 +26,7 @@ public class Game implements IApplication {
 
     private boolean shouldClose = false;
 
-    //fps variables
+    // FPS variables
     private int fpsCounter = 0;
     private long lastTime = System.nanoTime();
     private float deltaTime = 0;
@@ -91,8 +91,8 @@ public class Game implements IApplication {
     @Override
     public void update() {
         updateFps();
-        playerManager.update(player, world, input, !gui.showSettings(), deltaTime);
         world.update(player.getPos(), deltaTime);
+        playerManager.update(player, world, input, !gui.showSettings(), deltaTime);
     }
 
     @Override

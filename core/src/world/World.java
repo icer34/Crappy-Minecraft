@@ -107,7 +107,7 @@ public class World {
                     long id = getChunkID(cx, cz);
                     if (chunks.containsKey(id)) continue;
 
-                    if(inFlight.putIfAbsent(id, true) != null) return;
+                    if(inFlight.putIfAbsent(id, true) != null) continue;
 
                     pool.submit(() -> {
                         try{

@@ -60,7 +60,7 @@ public class PackedMesh implements Mesh{
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glDrawElements(GL_TRIANGLES, numVert, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, numIdx, GL_UNSIGNED_INT, 0);
     }
 
     @Override

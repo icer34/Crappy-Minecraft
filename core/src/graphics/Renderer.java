@@ -196,9 +196,9 @@ public class Renderer {
                 continue;
             }
 
-            c.updateBiomeMapTexture();
             glActiveTexture(GL_TEXTURE1);
             c.bindBiomeMapTexture();
+            c.updateBiomeMapTexture();
 
             worldMatrix.identity().translate(c.getWorldPos());
 
@@ -210,12 +210,20 @@ public class Renderer {
         blockShaderProgram.unbind();
 
         waterShaderProgram.bind();
+        glDisable(GL_CULL_FACE);
+
         glActiveTexture(GL_TEXTURE0);
         textureAtlas.bind();
-        glDisable(GL_CULL_FACE);
+
+        glActiveTexture(GL_TEXTURE2);
+        tintTexture.bind();
         for(Chunk c : chunks) {
             //don't render if out of the frustum
             if(!c.isVisible()) continue;
+
+            glActiveTexture(GL_TEXTURE1);
+            c.bindBiomeMapTexture();
+            c.updateBiomeMapTexture();
 
             worldMatrix.identity().translate(c.getWorldPos());
 
