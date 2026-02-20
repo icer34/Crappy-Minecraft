@@ -50,6 +50,7 @@ public class World {
         blockRegistry.insert(new StoneBlock());
         blockRegistry.insert(new GrassBlock());
         blockRegistry.insert(new WaterBlock());
+        blockRegistry.insert(new DirtBlock());
 
         this.chunkMesher = new ChunkMesher(CHUNK_SIZE, MAX_HEIGHT, blockRegistry);
 
@@ -263,18 +264,18 @@ public class World {
         return getBlockAt(wPos);
     }
 
-    public byte getBiomeAt(Vector3i pos) {
+    public Biome getBiomeAt(Vector3i pos) {
         int wx = pos.x;
         int wy = pos.y;
         int wz = pos.z;
 
-        if (wy < 0 || wy >= MAX_HEIGHT) return -1;
+        if (wy < 0 || wy >= MAX_HEIGHT) return Biome.UNDEFINED;
 
         int cx = (int) floor((float)wx / CHUNK_SIZE);
         int cz = (int) floor((float)wz / CHUNK_SIZE);
 
         Chunk c = chunks.get(getChunkID(cx, cz));
-        if (c == null) return -1;
+        if (c == null) return Biome.UNDEFINED;
 
         int lx = wx - cx * CHUNK_SIZE;
         int lz = wz - cz * CHUNK_SIZE;

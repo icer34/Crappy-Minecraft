@@ -61,8 +61,8 @@ public class Chunk {
         this.biomeMap = biomeMap;
     }
 
-    public byte getBiomeAt(int lx, int lz) {
-        return biomeMap[lx][lz];
+    public Biome getBiomeAt(int lx, int lz) {
+        return Biome.fromID(biomeMap[lx][lz]);
     }
 
     public byte[][] getBiomeMap() {
