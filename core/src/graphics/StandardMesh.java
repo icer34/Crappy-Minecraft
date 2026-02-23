@@ -23,7 +23,10 @@ public class StandardMesh implements Mesh {
     }
 
     @Override
-    public void update(float[] vertices, int[] indices) {
+    public void update(MeshData data) {
+        float[] vertices = data.vertices();
+        int[] indices = data.indices();
+
         this.numVert = vertices.length;
         this.numIdx = indices.length;
 
@@ -58,11 +61,6 @@ public class StandardMesh implements Mesh {
     @Override
     public void draw() {
         glBindVertexArray(vao);
-
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glEnable(GL_DEPTH_TEST);
-
         glDrawElements(GL_TRIANGLES, numVert, GL_UNSIGNED_INT, 0);
     }
 

@@ -7,6 +7,7 @@ import game.Player;
 import org.joml.Math;
 import org.joml.*;
 import utils.Faces;
+import utils.ModelParser;
 import utils.RayCastResult;
 import utils.RayCaster;
 import world.BlockRegistry;
@@ -30,7 +31,10 @@ public class Renderer {
     private ShaderProgram blockShaderProgram;
     private ShaderProgram waterShaderProgram;
     private ShaderProgram lineShaderProgram;
+    private ShaderProgram playerShaderProgram;
     private BlockOutline outline = new BlockOutline();
+
+    private StandardMesh playerModelMesh = new StandardMesh();
 
     private Matrix4f projMatrix = new Matrix4f().identity();
     private Matrix4f viewMatrix = new Matrix4f().identity();
@@ -54,6 +58,7 @@ public class Renderer {
         this.zNear = zNear;
         this.zFar = zFar;
         this.textureAtlas = new TextureAtlas(16);
+        this.playerModelMesh.update(ModelParser.parseOBJ("models/playerModel.obj"));
 
         //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
@@ -141,6 +146,17 @@ public class Renderer {
 
         lineShaderProgram.setUniforms(new String[]{"thickness"},
                                        new Object[]{1.5f});
+
+
+        this.playerShaderProgram = createShaderProgram("player shader",
+                                                       "shaders/playerVert.glsl",
+                                                       "shaders/playerFrag.glsl");
+
+        playerShaderProgram.createUniforms(new String[]{
+                "projMatrix",
+                "viewMatrix",
+                "worldMatrix",
+        });
     }
 
     public void render(World world, Player player) {
@@ -166,6 +182,11 @@ public class Renderer {
         lineShaderProgram.setUniforms(
                 new String[]{"projMatrix", "viewMatrix"},
                 new Object[]{projMatrix, viewMatrix}
+                );
+
+        playerShaderProgram.setUniforms(
+                new String[]{"projMatrix", "viewMatrix", "worldMatrix"},
+                new Object[]{projMatrix, viewMatrix, worldMatrix.identity().translate(player.getPos())}
                 );
 
         blockShaderProgram.bind();
@@ -234,6 +255,10 @@ public class Renderer {
         waterShaderProgram.unbind();
 
         drawBlockOutline(world, player);
+
+        //DO THIS ONLY IF THE PLAYER IS IN 3rd PERSON CAM
+        //playerShaderProgram.bind();
+        //playerModelMesh.draw();
     }
 
     private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {

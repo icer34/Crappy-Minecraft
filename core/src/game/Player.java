@@ -53,6 +53,7 @@ public class Player {
 
     public void rotate(float mouseDx, float mouseDy) {
         cam.rotate(-mouseDy, mouseDx, 0.0f);
+        syncCam();
     }
 
     public Vector3f getForwardXZ(Vector3f dest) {
@@ -109,7 +110,10 @@ public class Player {
     }
 
     public void syncCam() {
-        cam.setPosition(pos.x, pos.y + eyeHeight, pos.z);
+        if(freeCam) return;
+
+        Vector3f eyePos = new Vector3f(pos.x, pos.y + eyeHeight, pos.z);
+        cam.setPosition(eyePos);
     }
 
     public Vector3f getEyePos() {

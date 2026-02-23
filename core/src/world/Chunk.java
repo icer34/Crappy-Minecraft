@@ -2,6 +2,7 @@ package world;
 
 import graphics.BiomeMapTexture;
 import graphics.ChunkMeshData;
+import graphics.MeshData;
 import graphics.PackedMesh;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -96,8 +97,8 @@ public class Chunk {
     }
 
     public void updateMeshes(ChunkMeshData data) {
-        solidMesh.update(data.solidVert(), data.solidIdx());
-        waterMesh.update(data.waterVert(), data.waterIdx());
+        solidMesh.update(new MeshData(data.solidVert(), data.solidIdx()));
+        waterMesh.update(new MeshData(data.waterVert(), data.waterIdx()));
     }
 
     public int getChunkX() {

@@ -1,7 +1,7 @@
 package graphics;
 
 public interface Mesh {
-    void update(float[] vertices, int[] indices);
+    void update(MeshData data);
     void draw();
     void delete();
 }

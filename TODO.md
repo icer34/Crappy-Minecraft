@@ -14,10 +14,10 @@
 - [ ] Fill all the addFace() methods in the ChunkMesher (different data layout for water and solid)
 - [x] LUT texture for tints
 - [x] Texture of biomeID for each chunk
-- [ ] Add a player model (with skin support ?)
+- [x] Add a player model (with skin support ?)
+  - [ ] Add multiple camera support (only render player model if in 3rd person)
 - [ ] Water texture animation
   - [ ] Different shader for default water and realistic water
-- [x] Moving water surface
 - [ ] Lighting
   - Torch lighting, other light sources ??
   - Better ambient lighting

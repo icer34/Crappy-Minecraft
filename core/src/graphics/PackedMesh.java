@@ -23,7 +23,10 @@ public class PackedMesh implements Mesh{
     }
 
     @Override
-    public void update(float[] vertices, int[] indices) {
+    public void update(MeshData data) {
+        float[] vertices = data.vertices();
+        int[] indices = data.indices();
+
         numVert = vertices.length;
         numIdx = indices.length;
 
