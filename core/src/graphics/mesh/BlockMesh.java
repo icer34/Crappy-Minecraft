@@ -1,4 +1,4 @@
-package graphics;
+package graphics.mesh;
 
 public final class BlockMesh {
     private BlockMesh() {}

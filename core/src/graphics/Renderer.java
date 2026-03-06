@@ -4,6 +4,8 @@ import blocks.Block;
 import blocks.MultiTexturedBlock;
 import core.Window;
 import game.Player;
+import graphics.hud.HUD;
+import graphics.mesh.StandardMesh;
 import org.joml.Math;
 import org.joml.*;
 import utils.Faces;
@@ -30,9 +32,9 @@ public class Renderer {
 
     private ShaderProgram blockShaderProgram;
     private ShaderProgram waterShaderProgram;
-    private ShaderProgram lineShaderProgram;
     private ShaderProgram playerShaderProgram;
-    private BlockOutline outline = new BlockOutline();
+
+    private BlockOutline blockOutline = new BlockOutline();
 
     private StandardMesh playerModelMesh = new StandardMesh();
 
@@ -133,24 +135,6 @@ public class Renderer {
                 new Object[]{16.0f, 16.0f, 1024.0f, (float)(1024 / (16 + 16)), waterTransparency, 0, 1, 2, waterFogColor, waterFogDensity}
                 );
 
-
-        this.lineShaderProgram = createShaderProgram("line shader",
-                                                     "shaders/lineVert.glsl",
-                                                     "shaders/lineFrag.glsl",
-                                                     "shaders/lineGeom.glsl");
-
-        lineShaderProgram.createUniforms(new String[]{
-                "projMatrix",
-                "viewMatrix",
-                "worldMatrix",
-                "viewport",
-                "thickness",
-        });
-
-        lineShaderProgram.setUniforms(new String[]{"thickness"},
-                                       new Object[]{1.5f});
-
-
         this.playerShaderProgram = createShaderProgram("player shader",
                                                        "shaders/playerVert.glsl",
                                                        "shaders/playerFrag.glsl");
@@ -181,11 +165,6 @@ public class Renderer {
         waterShaderProgram.setUniforms(
                 new String[]{"projMatrix", "viewMatrix", "camPos", "isUnderWater"},
                 new Object[]{projMatrix, viewMatrix, cam.getPosition(), world.isPlayerUnderWater() ? 1 : 0});
-
-        lineShaderProgram.setUniforms(
-                new String[]{"projMatrix", "viewMatrix"},
-                new Object[]{projMatrix, viewMatrix}
-                );
 
         playerShaderProgram.setUniforms(
                 new String[]{"projMatrix", "viewMatrix", "worldMatrix"},
@@ -257,7 +236,9 @@ public class Renderer {
         }
         waterShaderProgram.unbind();
 
-        drawBlockOutline(world, player);
+        blockOutline.draw(world, player,
+                          window.getWidth(), window.getHeight(),
+                          viewMatrix, projMatrix);
 
         if(player.isFreeCam()) {
             playerShaderProgram.bind();
@@ -271,7 +252,7 @@ public class Renderer {
         ShaderProgram program = new ShaderProgram(name);
         program.addShader(vertPath, GL_VERTEX_SHADER);
 
-        for(String path : extraPaths) {
+        for (String path : extraPaths) {
             program.addShader(path, GL_GEOMETRY_SHADER);
         }
 
@@ -280,31 +261,6 @@ public class Renderer {
         program.link();
 
         return program;
-    }
-
-    private void drawBlockOutline(World world, Player player) {
-        //targeted block outline
-        RayCaster caster = new RayCaster(world);
-        RayCastResult result = caster.castRay(player.getEyePos(), player.getCam().getFront(), player.getReach());
-
-        if(!result.hit()) return;
-
-        //compute world matrix
-        Matrix4f worldMatrix = new Matrix4f();
-        Vector3i wPos = result.targetPos();
-        worldMatrix.identity()
-                   .translate(wPos.x + 0.5f, wPos.y + 0.5f, wPos.z + 0.5f)
-                   .scale(1.0f + BlockOutline.EPS)
-                   .translate(-0.5f, -0.5f, -0.5f);
-        Vector2f viewport = new Vector2f(window.getWidth(), window.getHeight());
-
-        lineShaderProgram.bind();
-        lineShaderProgram.setUniforms(new String[]{"worldMatrix", "viewport"},
-                                      new Object[]{worldMatrix, viewport});
-
-        outline.render();
-
-        lineShaderProgram.unbind();
     }
 
     public void setzNear(float zNear) {

@@ -1,4 +1,4 @@
-package graphics;
+package graphics.mesh;
 
 import blocks.Block;
 import blocks.GrassBlock;
@@ -69,11 +69,9 @@ public class ChunkMesher {
 
                         if(isWater) {
                             if(isPacked) addPackedSolidFace(waterVertList, waterIdxList, x, y, z, waterFaces, blockID, face);
-                            else addSolidFace(waterVertList, waterIdxList, x, y, z, waterFaces, blockID, face);
                             waterFaces++;
                         } else {
                             if(isPacked) addPackedSolidFace(solidVertList, solidIdxList, x, y, z, solidFaces, blockID, face);
-                            else addSolidFace(solidVertList, solidIdxList, x, y, z, solidFaces, blockID, face);
                             solidFaces++;
                         }
                     }
@@ -116,15 +114,6 @@ public class ChunkMesher {
         return nb != null ? nb : registry.blockFromName("air_block");
     }
 
-    private void addSolidFace(FloatArrayList verts, IntArrayList indices,
-                              float x, float y, float z,
-                              int addedFaces,
-                              int blockID,
-                              int face)
-    {
-
-    }
-
     private void addPackedSolidFace(FloatArrayList verts, IntArrayList indices,
                               float x, float y, float z,
                               int addedFaces,
@@ -163,15 +152,6 @@ public class ChunkMesher {
         for(int i = 0; i < 6; i++) {
             indices.add(BlockMesh.FACE_IDX[i] + 4 * addedFaces);
         }
-    }
-
-    private void addWaterFace(FloatArrayList verts, IntArrayList indices,
-                              float x, float y, float z,
-                              int addedFaces,
-                              int blockID,
-                              int face)
-    {
-
     }
 
     private void addPackedWaterFace(FloatArrayList verts, IntArrayList indices,

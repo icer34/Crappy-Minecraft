@@ -1,6 +1,6 @@
 package utils;
 
-import graphics.MeshData;
+import graphics.mesh.MeshData;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 

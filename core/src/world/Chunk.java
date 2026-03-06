@@ -1,9 +1,9 @@
 package world;
 
 import graphics.BiomeMapTexture;
-import graphics.ChunkMeshData;
-import graphics.MeshData;
-import graphics.PackedMesh;
+import graphics.mesh.ChunkMeshData;
+import graphics.mesh.MeshData;
+import graphics.mesh.PackedMesh;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 

@@ -1,9 +1,9 @@
 package world;
 
 import blocks.*;
-import graphics.*;
+import graphics.mesh.ChunkMeshData;
+import graphics.mesh.ChunkMesher;
 import org.joml.*;
-import org.w3c.dom.Text;
 
 import java.util.Collection;
 import java.util.Map;

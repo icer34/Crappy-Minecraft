@@ -1,5 +1,13 @@
 # Crappy Minecraft - TODO List
 
+## Random small stuff
+- [x] Modify the block outline class (less code in the renderer class)
+  - give the outline its shader and simple interface to work with
+- [ ] Cleanup the main render code
+  - separate methods for blocks / water render
+- [ ] Finish the HUD stuff
+- [ ] Use different packing for water and solid meshes
+
 ## Optimisations
 - [x] Change biomeMap texture: upload texture once to GPU at chunk creation, store texID in chunk and bind to it before rendering
 - [ ] Implement LODs (Distant Horizons type shit)

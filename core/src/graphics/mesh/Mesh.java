@@ -1,4 +1,4 @@
-package graphics;
+package graphics.mesh;
 
 public interface Mesh {
     void update(MeshData data);

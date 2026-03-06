@@ -1,6 +1,7 @@
-package graphics;
+package graphics.hud;
 
 import core.Window;
+import graphics.mesh.Mesh;
 
 import java.util.ArrayList;
 
