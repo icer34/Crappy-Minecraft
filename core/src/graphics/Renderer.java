@@ -42,6 +42,8 @@ public class Renderer {
 
     private Frustum frustum = new Frustum();
 
+    private HUD hud;
+
     private float zNear, zFar;
     private float fov;
 
@@ -59,6 +61,7 @@ public class Renderer {
         this.zFar = zFar;
         this.textureAtlas = new TextureAtlas(16);
         this.playerModelMesh.update(ModelParser.parseOBJ("models/playerModel.obj"));
+        this.hud = new HUD(window);
 
         //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
@@ -256,9 +259,12 @@ public class Renderer {
 
         drawBlockOutline(world, player);
 
-        //DO THIS ONLY IF THE PLAYER IS IN 3rd PERSON CAM
-        //playerShaderProgram.bind();
-        //playerModelMesh.draw();
+        if(player.isFreeCam()) {
+            playerShaderProgram.bind();
+            playerModelMesh.draw();
+        }
+
+        hud.draw();
     }
 
     private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {
