@@ -1,10 +1,8 @@
-package graphics.hud;
+package graphics.mesh;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-import graphics.mesh.Mesh;
-import graphics.mesh.MeshData;
 import org.lwjgl.system.MemoryUtil;
 
 import static org.lwjgl.opengl.GL33.*;
@@ -18,14 +16,11 @@ public class HUDMesh implements Mesh {
     private int numVert;
     private int numIdx;
 
-    public HUDMesh() {
+    public HUDMesh(MeshData data) {
         this.vao = glGenVertexArrays();
         this.vbo = glGenBuffers();
         this.ebo = glGenBuffers();
-    }
 
-    @Override
-    public void update(MeshData data) {
         numVert = data.vertices().length;
         numIdx = data.indices().length;
 
@@ -53,6 +48,10 @@ public class HUDMesh implements Mesh {
         MemoryUtil.memFree(fb);
         MemoryUtil.memFree(ib);
     }
+
+    //Should never be updated for an HUD mesh
+    @Override
+    public void update(MeshData data) {}
 
     @Override
     public void draw() {

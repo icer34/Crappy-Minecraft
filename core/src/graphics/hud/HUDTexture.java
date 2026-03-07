@@ -12,6 +12,9 @@ public class HUDTexture {
 
     private final int texID;
 
+    private final int width;
+    private final int height;
+
     public HUDTexture (String path) {
         this.texID = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, texID);
@@ -28,6 +31,9 @@ public class HUDTexture {
 
             ByteBuffer pngData = stbi_load(path, width, height, channels, 4);
 
+            this.width = width.get();
+            this.height = height.get();
+
             if(pngData == null) {
                 System.out.println("Failed to load the HUD texture: " + path);
                 return;
@@ -36,7 +42,7 @@ public class HUDTexture {
             glTexImage2D(GL_TEXTURE_2D,
                          0,
                          GL_RGBA,
-                         width.get(), height.get(),
+                         this.width, this.height,
                          0,
                          GL_RGBA,
                          GL_UNSIGNED_BYTE,
@@ -49,5 +55,13 @@ public class HUDTexture {
     public void load() {
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texID);
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public int getWidth() {
+        return width;
     }
 }

@@ -58,7 +58,7 @@ public class Game implements IApplication {
 
         renderer = new Renderer(window, world.getBlockRegistry(), 80.0f, 0.001f, 1000.0f);
 
-        player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f) + 10.0f, 0.0f));
+        player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f), 0.0f));
         playerManager = new PlayerManager();
         playerManager.setMode(player, new SurvivalMode(world));
 
