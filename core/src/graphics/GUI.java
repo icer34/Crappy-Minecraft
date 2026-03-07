@@ -1,7 +1,5 @@
 package graphics;
 
-import core.*;
-
 import game.*;
 import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
@@ -12,6 +10,7 @@ import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Direction;
 import utils.RayCaster;
+import utils.Window;
 import world.TerrainGenerator;
 import world.World;
 

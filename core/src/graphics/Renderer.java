@@ -2,7 +2,7 @@ package graphics;
 
 import blocks.Block;
 import blocks.MultiTexturedBlock;
-import core.Window;
+import utils.Window;
 import game.Player;
 import graphics.hud.HUD;
 import graphics.mesh.StandardMesh;
@@ -10,8 +10,6 @@ import org.joml.Math;
 import org.joml.*;
 import utils.Faces;
 import utils.ModelParser;
-import utils.RayCastResult;
-import utils.RayCaster;
 import world.BlockRegistry;
 import world.Chunk;
 import world.World;
@@ -236,16 +234,16 @@ public class Renderer {
         }
         waterShaderProgram.unbind();
 
-        blockOutline.draw(world, player,
-                          window.getWidth(), window.getHeight(),
-                          viewMatrix, projMatrix);
-
         if(player.isFreeCam()) {
             playerShaderProgram.bind();
             playerModelMesh.draw();
         }
 
         hud.draw();
+
+        blockOutline.draw(world, player,
+                          window.getWidth(), window.getHeight(),
+                          viewMatrix, projMatrix);
     }
 
     private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {

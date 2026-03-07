@@ -5,7 +5,6 @@
   - give the outline its shader and simple interface to work with
 - [ ] Cleanup the main render code
   - separate methods for blocks / water render
-- [ ] Finish the HUD stuff
 - [ ] Use different packing for water and solid meshes
 
 ## Optimisations

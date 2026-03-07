@@ -3,7 +3,6 @@ package graphics.mesh;
 public final class BlockMesh {
     private BlockMesh() {}
 
-
     public static final int[][] EDGE_IDX = {
             {0, 1}, {0, 3}, {1, 2}, {2, 3},
             {4, 5}, {4, 7}, {5, 6}, {6, 7},

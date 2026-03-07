@@ -57,7 +57,7 @@ public class HUDMesh implements Mesh {
     @Override
     public void draw() {
         glBindVertexArray(vao);
-        glDrawElements(GL_TRIANGLES, numVert, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, numIdx, GL_UNSIGNED_INT, 0);
     }
 
     @Override

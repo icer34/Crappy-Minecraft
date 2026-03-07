@@ -243,6 +243,12 @@ public class World {
         terrainGenerator.setSeaLvl(seaLvl);
     }
 
+    public boolean isChunkLoaded(float x, float z) {
+        int cx = (int) floor(floor(x) / CHUNK_SIZE);
+        int cz = (int) floor(floor(z) / CHUNK_SIZE);
+        return chunks.containsKey(getChunkID(cx, cz));
+    }
+
     public int getGroundHeight(float x, float z) {
         int wx = (int) floor(x);
         int wz = (int) floor(z);

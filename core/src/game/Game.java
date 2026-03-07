@@ -1,8 +1,8 @@
 package game;
 
-import core.IApplication;
+import main.IApplication;
 import graphics.Renderer;
-import core.Window;
+import utils.Window;
 import graphics.*;
 
 import org.joml.Vector3f;
@@ -24,20 +24,17 @@ public class Game implements IApplication {
 
     World world;
 
-    private boolean shouldClose = false;
-
     // FPS variables
     private int fpsCounter = 0;
     private long lastTime = System.nanoTime();
     private float deltaTime = 0;
     long fpsStartTime = lastTime;
-    private int fps;
 
     public void run() {
 
         init();
 
-        while(!shouldClose && !window.shouldClose()) {
+        while(!window.shouldClose()) {
 
             input();
 
@@ -54,14 +51,14 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1600, 900, true);
+        window = new Window("Crappy Minecraft", 1600, 900, false);
         window.init(input = new Input());
 
         world = new World(0);
 
         renderer = new Renderer(window, world.getBlockRegistry(), 80.0f, 0.001f, 1000.0f);
 
-        player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f) + 5.0f, 0.0f));
+        player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f) + 10.0f, 0.0f));
         playerManager = new PlayerManager();
         playerManager.setMode(player, new SurvivalMode(world));
 
@@ -124,7 +121,7 @@ public class Game implements IApplication {
 
         long elapsedTime = currentTime - fpsStartTime;
         if (elapsedTime >= 1_000_000_000) {
-            fps = fpsCounter;
+            int fps = fpsCounter;
             fpsCounter = 0;
             fpsStartTime = currentTime;
             gui.updateFps(fps);
