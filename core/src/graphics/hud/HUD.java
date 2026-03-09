@@ -15,6 +15,8 @@ public class HUD {
     ShaderProgram hudShader;
     ArrayList<HUDElement> elements = new ArrayList<>();
 
+    private float scale = 3.5f;
+
     public HUD(Window window) {
         //----SETUP SHADER----
         hudShader = new ShaderProgram("HUD shader");
@@ -34,8 +36,10 @@ public class HUD {
                               new Object[]{ortho, 0});
 
         //----ADD INDIVIDUAL ELEMENTS----
-        elements.add(new Crosshair(window.getWidth(), window.getHeight(),
+        elements.add(new Crosshair(window.getWidth(), window.getHeight(), scale,
                                    "textures/gui/sprites/hud/crosshair.png"));
+        elements.add(new Hotbar(window.getWidth(), window.getHeight(), scale,
+                                "textures/gui/sprites/hud/hotbar.png"));
     }
 
     public void draw() {
@@ -48,5 +52,16 @@ public class HUD {
 
         glEnable(GL_DEPTH_TEST);
         hudShader.unbind();
+    }
+
+    public void setScale(float value) {
+        this.scale = value;
+        for(HUDElement e : elements) {
+            e.setScale(scale);
+        }
+    }
+
+    public float getScale() {
+        return scale;
     }
 }

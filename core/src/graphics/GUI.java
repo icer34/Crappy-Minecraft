@@ -39,6 +39,7 @@ public class GUI {
     private int renderDistance;
     private float timeSpeed;
     private int gameMode;
+    private float HUDscale;
 
     //terrain gen settings
     private int octaves;
@@ -76,6 +77,7 @@ public class GUI {
         this.renderDistance = world.getRenderDistance();
         this.timeSpeed = world.getTimeSpeed();
         this.gameMode = (playerManager.getGameMode() instanceof SurvivalMode) ? 0 : 1;
+        this.HUDscale = renderer.getHUDscale();
 
         this.octaves = terrainGenerator.getOctaves();
         this.lacunarity = terrainGenerator.getLacunarity();
@@ -176,6 +178,12 @@ public class GUI {
         if (ImGui.sliderFloat("Time speed", timeSpeedArray, 0.0f, 5.0f)) {
             timeSpeed = timeSpeedArray[0];
             world.setTimeSpeed(timeSpeed);
+        }
+
+        float[] hudScaleArray = {HUDscale};
+        if (ImGui.sliderFloat("HUD scale", hudScaleArray, 0.5f, 5.0f)) {
+            HUDscale = hudScaleArray[0];
+            renderer.setHUDscale(HUDscale);
         }
 
         int currentGameMode = gameMode;

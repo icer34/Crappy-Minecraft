@@ -10,11 +10,17 @@ public class Hotbar extends HUDElement {
 
     private float width;
     private float height;
-    private float scale = 2;
+    private float scale;
 
-    public Hotbar(int screenWidth, int screenHeight, String texturePath) {
-        super(screenWidth, screenHeight);
+    public Hotbar(int screenWidth, int screenHeight, float scale, String texturePath) {
+        super(screenWidth, screenHeight, scale);
+
+        this.scale = scale;
+
         this.texture = new HUDTexture(texturePath);
+        this.width = texture.getWidth();
+        this.height = texture.getHeight();
+
         this.mesh = new HUDMesh(createMeshData());
     }
 
@@ -24,7 +30,28 @@ public class Hotbar extends HUDElement {
         mesh.draw();
     }
 
+    @Override
+    public void setScale(float value) {
+        this.scale = value;
+        this.mesh.update(createMeshData());
+    }
+
     private MeshData createMeshData() {
-        return null;
+        float cx = screenWidth / 2f;
+
+        float x0 = cx - (width * scale) / 2f;
+        float x1 = cx + (width * scale) / 2f;
+        float y0 = screenHeight - (height * scale);
+        float y1 = screenHeight;
+
+        float[] vertices = new float[] {x0, y0, 0f, 0f, //top left
+                                        x1, y0, 1f, 0f, //top right
+                                        x0, y1, 0f, 1f, //bottom left
+                                        x1, y1, 1f, 1f};//bottom right
+
+        int[] indices = new int[] {0, 3, 2,
+                                   0, 1, 3};
+
+        return new MeshData(vertices, indices);
     }
 }

@@ -296,4 +296,12 @@ public class Renderer {
     public void setWaterTransparency(float val) {
         waterTransparency = val;
     }
+
+    public float getHUDscale() {
+        return hud.getScale();
+    }
+
+    public void setHUDscale(float value) {
+        hud.setScale(value);
+    }
 }

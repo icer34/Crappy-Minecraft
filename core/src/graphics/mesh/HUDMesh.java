@@ -21,6 +21,12 @@ public class HUDMesh implements Mesh {
         this.vbo = glGenBuffers();
         this.ebo = glGenBuffers();
 
+        update(data);
+    }
+
+    //Should never be updated for an HUD mesh
+    @Override
+    public void update(MeshData data) {
         numVert = data.vertices().length;
         numIdx = data.indices().length;
 
@@ -48,10 +54,6 @@ public class HUDMesh implements Mesh {
         MemoryUtil.memFree(fb);
         MemoryUtil.memFree(ib);
     }
-
-    //Should never be updated for an HUD mesh
-    @Override
-    public void update(MeshData data) {}
 
     @Override
     public void draw() {

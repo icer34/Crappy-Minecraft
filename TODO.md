@@ -1,10 +1,6 @@
 # Crappy Minecraft - TODO List
 
 ## Random small stuff
-- [x] Modify the block outline class (less code in the renderer class)
-  - give the outline its shader and simple interface to work with
-- [ ] Cleanup the main render code
-  - separate methods for blocks / water render
 - [ ] Use different packing for water and solid meshes
 
 ## Optimisations

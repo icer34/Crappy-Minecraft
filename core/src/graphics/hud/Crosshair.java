@@ -12,9 +12,10 @@ public class Crosshair extends HUDElement {
     private float height;
     private float scale = 2f;
 
-    public Crosshair(int screenWidth, int screenHeight, String texturePath) {
-        super(screenWidth, screenHeight);
+    public Crosshair(int screenWidth, int screenHeight, float scale, String texturePath) {
+        super(screenWidth, screenHeight, scale);
 
+        this.scale = scale;
         this.texture = new HUDTexture(texturePath);
         this.width = texture.getWidth();
         this.height = texture.getHeight();
@@ -28,15 +29,21 @@ public class Crosshair extends HUDElement {
         mesh.draw();
     }
 
+    @Override
+    public void setScale(float value) {
+        this.scale = value;
+        this.mesh.update(createMeshData());
+    }
+
     private MeshData createMeshData() {
         //get the center of the window
         float cx = screenWidth / 2f;
         float cy = screenHeight / 2f;
 
-        float x0 = cx - (width * scale) / 2f;
-        float x1 = cx + (width * scale) / 2f;
-        float y0 = cy - (height * scale) / 2f;
-        float y1 = cy + (height * scale) / 2f;
+        float x0 = cx - (width * scale * 0.75f) / 2f;
+        float x1 = cx + (width * scale * 0.75f) / 2f;
+        float y0 = cy - (height * scale * 0.75f) / 2f;
+        float y1 = cy + (height * scale * 0.75f) / 2f;
 
         float[] vertices = new float[] {x0, y0, 0f, 0f, //top left
                                         x1, y0, 1f, 0f, //top right
