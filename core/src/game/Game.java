@@ -2,6 +2,7 @@ package game;
 
 import main.IApplication;
 import graphics.Renderer;
+import graphics.hud.HUD;
 import utils.Window;
 import graphics.*;
 
@@ -17,6 +18,7 @@ public class Game implements IApplication {
     Window window;
     Input input;
     Renderer renderer;
+    HUD hud;
     GUI gui;
 
     PlayerManager playerManager;
@@ -51,7 +53,7 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1600, 900, false);
+        window = new Window("Crappy Minecraft", 1600, 900, true);
         window.init(input = new Input());
 
         world = new World(0);
@@ -62,7 +64,9 @@ public class Game implements IApplication {
         playerManager = new PlayerManager();
         playerManager.setMode(player, new SurvivalMode(world));
 
-        gui = new GUI(window, renderer, player, playerManager, world);
+        hud = new HUD(window);
+
+        gui = new GUI(window, renderer, player, playerManager, world, hud);
 
         //background color
         glClearColor(.0f, .0f, .0f, 1f);
@@ -96,7 +100,7 @@ public class Game implements IApplication {
     public void render() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.render(world, player);
+        renderer.render(world, player, hud);
 
         gui.newFrame();
 

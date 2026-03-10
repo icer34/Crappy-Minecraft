@@ -1,7 +1,8 @@
 # Crappy Minecraft - TODO List
 
-## Random small stuff
-- [ ] Use different packing for water and solid meshes
+## Next up
+- [ ] Implement Item, Inventory, and their rendering. (inventory is not in the HUD)
+  - HUD is what is perma rendered on the screen (crosshair, hotbar, health, armor, ...)
 
 ## Optimisations
 - [x] Change biomeMap texture: upload texture once to GPU at chunk creation, store texID in chunk and bind to it before rendering

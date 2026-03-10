@@ -1,6 +1,7 @@
 package graphics;
 
 import game.*;
+import graphics.hud.HUD;
 import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
@@ -24,6 +25,7 @@ public class GUI {
     World world;
     TerrainGenerator terrainGenerator;
     RayCaster rayCaster;
+    HUD hud;
 
     ImGuiImplGlfw imGuiGlfw;
     ImGuiImplGl3 imGuiGl3;
@@ -54,7 +56,7 @@ public class GUI {
     private float waterTransparency;
 
 
-    public GUI(Window window, Renderer renderer, Player player, PlayerManager playerManager, World world) {
+    public GUI(Window window, Renderer renderer, Player player, PlayerManager playerManager, World world, HUD hud) {
         this.window = window;
         this.renderer = renderer;
         this.cam = player.getCam();
@@ -63,6 +65,7 @@ public class GUI {
         this.terrainGenerator = world.getGenerator();
         this.rayCaster = new RayCaster(world);
         this.playerManager = playerManager;
+        this.hud = hud;
 
         this.imGuiGlfw = new ImGuiImplGlfw();
         this.imGuiGl3 = new ImGuiImplGl3();
@@ -77,7 +80,7 @@ public class GUI {
         this.renderDistance = world.getRenderDistance();
         this.timeSpeed = world.getTimeSpeed();
         this.gameMode = (playerManager.getGameMode() instanceof SurvivalMode) ? 0 : 1;
-        this.HUDscale = renderer.getHUDscale();
+        this.HUDscale = hud.getScale();
 
         this.octaves = terrainGenerator.getOctaves();
         this.lacunarity = terrainGenerator.getLacunarity();
@@ -183,7 +186,7 @@ public class GUI {
         float[] hudScaleArray = {HUDscale};
         if (ImGui.sliderFloat("HUD scale", hudScaleArray, 0.5f, 5.0f)) {
             HUDscale = hudScaleArray[0];
-            renderer.setHUDscale(HUDscale);
+            hud.setScale(HUDscale);
         }
 
         int currentGameMode = gameMode;

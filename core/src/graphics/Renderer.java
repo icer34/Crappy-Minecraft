@@ -42,7 +42,6 @@ public class Renderer {
 
     private Frustum frustum = new Frustum();
 
-    private HUD hud;
 
     private float zNear, zFar;
     private float fov;
@@ -61,7 +60,6 @@ public class Renderer {
         this.zFar = zFar;
         this.textureAtlas = new TextureAtlas(16);
         this.playerModelMesh.update(ModelParser.parseOBJ("models/playerModel.obj"));
-        this.hud = new HUD(window);
 
         //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
@@ -144,7 +142,7 @@ public class Renderer {
         });
     }
 
-    public void render(World world, Player player) {
+    public void render(World world, Player player, HUD hud) {
         Camera cam = player.getCam();
         Collection<Chunk> chunks = world.getChunks();
 
@@ -239,11 +237,11 @@ public class Renderer {
             playerModelMesh.draw();
         }
 
-        hud.draw();
-
         blockOutline.draw(world, player,
                           window.getWidth(), window.getHeight(),
                           viewMatrix, projMatrix);
+
+        hud.draw();
     }
 
     private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {
@@ -259,14 +257,6 @@ public class Renderer {
         program.link();
 
         return program;
-    }
-
-    public void setzNear(float zNear) {
-        this.zNear = zNear;
-    }
-
-    public void setzFar(float zFar) {
-        this.zFar = zFar;
     }
 
     public void setFov(float fov) {
@@ -295,13 +285,5 @@ public class Renderer {
 
     public void setWaterTransparency(float val) {
         waterTransparency = val;
-    }
-
-    public float getHUDscale() {
-        return hud.getScale();
-    }
-
-    public void setHUDscale(float value) {
-        hud.setScale(value);
     }
 }

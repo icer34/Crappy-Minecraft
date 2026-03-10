@@ -45,11 +45,13 @@ public class HUD {
     public void draw() {
         hudShader.bind();
         glDisable(GL_DEPTH_TEST);
+        glDisable(GL_CULL_FACE);
 
         for(HUDElement e : elements) {
             e.draw();
         }
 
+        glEnable(GL_CULL_FACE);
         glEnable(GL_DEPTH_TEST);
         hudShader.unbind();
     }
