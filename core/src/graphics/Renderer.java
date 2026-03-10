@@ -1,7 +1,7 @@
 package graphics;
 
-import blocks.Block;
-import blocks.MultiTexturedBlock;
+import game.blocks.Block;
+import game.blocks.MultiTexturedBlock;
 import utils.Window;
 import game.Player;
 import graphics.hud.HUD;
@@ -10,9 +10,9 @@ import org.joml.Math;
 import org.joml.*;
 import utils.Faces;
 import utils.ModelParser;
-import world.BlockRegistry;
-import world.Chunk;
-import world.World;
+import game.blocks.BlockRegistry;
+import game.world.Chunk;
+import game.world.World;
 
 import java.util.Collection;
 

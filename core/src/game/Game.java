@@ -8,7 +8,7 @@ import graphics.*;
 
 import org.joml.Vector3f;
 import utils.Input;
-import world.World;
+import game.world.World;
 
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -53,7 +53,7 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1600, 900, true);
+        window = new Window("Crappy Minecraft", 1600, 900, false);
         window.init(input = new Input());
 
         world = new World(0);

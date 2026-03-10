@@ -1,16 +1,15 @@
 package game;
 
-import blocks.Block;
-import blocks.BreakableBlock;
+import game.blocks.Block;
+import game.blocks.BreakableBlock;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;
 import utils.RayCastResult;
 import utils.RayCaster;
-import world.World;
+import game.world.World;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.joml.Math.*;
 
 public class SurvivalMode implements GameMode{
 

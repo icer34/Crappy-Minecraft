@@ -1,4 +1,4 @@
-package blocks;
+package game.blocks;
 
 public interface MultiTexturedBlock {
     String ovrTextureKey(int face);

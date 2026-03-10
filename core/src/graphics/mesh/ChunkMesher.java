@@ -1,13 +1,13 @@
 package graphics.mesh;
 
-import blocks.Block;
-import blocks.GrassBlock;
-import blocks.MultiTexturedBlock;
-import blocks.WaterBlock;
+import game.blocks.Block;
+import game.blocks.GrassBlock;
+import game.blocks.MultiTexturedBlock;
+import game.blocks.WaterBlock;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import world.BlockRegistry;
-import world.Chunk;
+import game.blocks.BlockRegistry;
+import game.world.Chunk;
 
 import java.util.Map;
 

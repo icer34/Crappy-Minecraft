@@ -1,7 +1,7 @@
-package blocks;
+package game.blocks;
 
 import org.joml.Vector3i;
-import world.World;
+import game.world.World;
 
 public abstract class Block implements IBlock {
     protected final String name;

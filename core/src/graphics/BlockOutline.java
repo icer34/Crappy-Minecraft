@@ -8,7 +8,7 @@ import org.joml.Vector3i;
 import org.lwjgl.system.MemoryUtil;
 import utils.RayCastResult;
 import utils.RayCaster;
-import world.World;
+import game.world.World;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;

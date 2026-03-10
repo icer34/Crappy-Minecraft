@@ -1,7 +1,7 @@
 package game;
 
 import utils.Input;
-import world.World;
+import game.world.World;
 
 public class PlayerManager {
     private GameMode currentMode;

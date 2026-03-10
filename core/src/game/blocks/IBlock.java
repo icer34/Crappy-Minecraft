@@ -1,7 +1,7 @@
-package blocks;
+package game.blocks;
 
 import org.joml.Vector3i;
-import world.World;
+import game.world.World;
 
 public interface IBlock {
     //Properties shared amongst all blocks

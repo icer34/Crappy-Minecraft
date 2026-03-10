@@ -1,4 +1,4 @@
-package blocks;
+package game.blocks;
 
 public interface AnimatedBlock {
 }

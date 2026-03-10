@@ -1,8 +1,7 @@
 package graphics;
 
 import org.lwjgl.BufferUtils;
-import org.lwjgl.system.MemoryUtil;
-import world.Chunk;
+import game.world.Chunk;
 
 import java.nio.ByteBuffer;
 

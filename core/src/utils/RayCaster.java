@@ -1,9 +1,9 @@
 package utils;
 
-import blocks.Block;
+import game.blocks.Block;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
-import world.World;
+import game.world.World;
 
 import static org.joml.Math.*;
 

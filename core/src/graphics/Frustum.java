@@ -3,12 +3,9 @@ package graphics;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import world.Chunk;
+import game.world.Chunk;
 
 import java.util.Collection;
-import java.util.Map;
-
-import static org.joml.Math.*;
 
 public class Frustum {
 

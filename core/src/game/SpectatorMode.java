@@ -3,7 +3,7 @@ package game;
 import graphics.Camera;
 import org.joml.Vector3f;
 import utils.Input;
-import world.World;
+import game.world.World;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;

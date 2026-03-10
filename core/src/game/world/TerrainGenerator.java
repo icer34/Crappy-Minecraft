@@ -1,8 +1,7 @@
-package world;
+package game.world;
 
+import game.blocks.BlockRegistry;
 import utils.PerlinNoise;
-
-import java.util.Arrays;
 
 public class TerrainGenerator {
 

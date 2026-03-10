@@ -1,4 +1,4 @@
-package blocks;
+package game.blocks;
 
 public class WaterBlock extends Block
                         implements AnimatedBlock {

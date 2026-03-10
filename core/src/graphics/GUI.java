@@ -12,8 +12,8 @@ import org.joml.Vector3i;
 import utils.Direction;
 import utils.RayCaster;
 import utils.Window;
-import world.TerrainGenerator;
-import world.World;
+import game.world.TerrainGenerator;
+import game.world.World;
 
 public class GUI {
 

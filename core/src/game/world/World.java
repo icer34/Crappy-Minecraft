@@ -1,6 +1,7 @@
-package world;
+package game.world;
 
-import blocks.*;
+import game.blocks.BlockRegistry;
+import game.blocks.*;
 import graphics.mesh.ChunkMeshData;
 import graphics.mesh.ChunkMesher;
 import org.joml.*;

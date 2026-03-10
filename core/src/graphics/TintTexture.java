@@ -1,7 +1,7 @@
 package graphics;
 
 import org.lwjgl.BufferUtils;
-import world.Biome;
+import game.world.Biome;
 
 import java.nio.ByteBuffer;
 

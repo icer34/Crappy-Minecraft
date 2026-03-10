@@ -1,4 +1,4 @@
-package world;
+package game.world;
 
 import graphics.BiomeMapTexture;
 import graphics.mesh.ChunkMeshData;

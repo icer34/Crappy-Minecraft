@@ -1,6 +1,4 @@
-package world;
-
-import blocks.Block;
+package game.blocks;
 
 import java.util.Collection;
 import java.util.HashMap;
