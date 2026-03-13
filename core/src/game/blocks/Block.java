@@ -1,5 +1,8 @@
 package game.blocks;
 
+import game.world.World;
+import org.joml.Vector3i;
+
 public class Block {
 
     private BlockSettings settings;
@@ -32,8 +35,12 @@ public class Block {
         return settings.multiTextured;
     }
 
+    public boolean isBreakable() {
+        return settings.breakable;
+    }
+
     public int getBaseTextureID(int face) {
-        return settings.getBaseTextureID(face);
+        return settings.baseTexturesID[face];
     }
 
     public void setBaseTextureID(int face, int id) {
@@ -41,10 +48,30 @@ public class Block {
     }
 
     public int getOvrTextureID(int face) {
-        return settings.getOvrTextureID(face);
+        return settings.ovrTexturesID[face];
     }
 
     public void setOvrTextureID(int face, int id) {
         settings.setOvrTexturesID(face, id);
+    }
+
+    public String getBaseTextureKey(int face) {
+        return settings.baseTexturesKey[face];
+    }
+
+    public String getOvrTextureKey(int face) {
+        return settings.ovrTexturesKey[face];
+    }
+
+    public void onBreak(World world, Vector3i pos) {
+        settings.onBreak.accept(world, pos);
+    }
+
+    public void onPlacement(World world, Vector3i pos) {
+        settings.onPlacement.accept(world, pos);
+    }
+
+    public void onInteract(World world, Vector3i pos) {
+        settings.onInteract.accept(world, pos);
     }
 }

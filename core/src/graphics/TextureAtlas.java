@@ -59,6 +59,8 @@ public class TextureAtlas {
 
         if(texturesSlots.containsKey(textureKey)) {
             return texturesSlots.get(textureKey);
+        } else if(textureKey.isEmpty()) {
+            return -1;
         }
 
         int id = slotID.incrementAndGet();

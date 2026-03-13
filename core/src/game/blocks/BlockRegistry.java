@@ -2,6 +2,7 @@ package game.blocks;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockRegistry {
@@ -17,13 +18,15 @@ public class BlockRegistry {
 
     private static final AtomicInteger ID = new AtomicInteger(-1);
 
-    public void insert(Block block) {
-        if(IDRegistry.containsValue(block))
-            throw new RuntimeException("this block already exists in the IDRegistry: " + block.name());
-        int id = ID.incrementAndGet();
-        IDRegistry.put(id, block);
-        nameRegistry.put(block.name(), id);
-        block.setID(id);
+    public BlockRegistry() {
+        for (Block b : ALL) {
+            if (IDRegistry.containsValue(b))
+                throw new RuntimeException("this block already exists in the IDRegistry: " + b.name());
+            int id = ID.incrementAndGet();
+            IDRegistry.put(id, b);
+            nameRegistry.put(b.name(), id);
+            b.setID(id);
+        }
     }
 
     public Block blockFromID(int id) {
@@ -46,8 +49,47 @@ public class BlockRegistry {
         return IDRegistry.values();
     }
 
-//    =================
-//    BLOCK DEFINITIONS
-//    =================
-    //todo
+//  =================
+//  BLOCK DEFINITIONS
+//  =================
+
+    private static final Block AIR = new Block(
+            new BlockSettings().def()
+                    .name("air_block")
+                    .solid(false)
+                    .transparent(true)
+                    .baseTextureKey("textures/particle/big_smoke_11.png")
+    );
+
+    private static final Block DIRT = new Block(
+            new BlockSettings().def()
+                    .name("dirt_block")
+                    .baseTextureKey("textures/block/dirt.png")
+    );
+
+    private static final Block GRASS = new Block(
+            new BlockSettings().def()
+                    .name("grass_block")
+                    .baseTextureKey("textures/block/dirt.png")
+                    .ovrTexturesKey("textures/block/grass_block_side_overlay.png",
+                                    "textures/block/grass_block_side_overlay.png",
+                                    "textures/block/grass_block_side_overlay.png",
+                                    "textures/block/grass_block_side_overlay.png",
+                                    "textures/block/grass_block_top.png")
+    );
+
+    private static final Block STONE = new Block(
+            new BlockSettings().def()
+                    .name("stone_block")
+                    .baseTextureKey("textures/block/stone.png")
+    );
+
+    private static final Block WATER = new Block(
+            new BlockSettings().def()
+                    .name("water_block")
+                    .baseTextureKey("textures/block/water_still.png")
+                    .solid(false)
+    );
+
+    private static final List<Block> ALL = List.of(AIR, DIRT, GRASS, STONE, WATER);
 }

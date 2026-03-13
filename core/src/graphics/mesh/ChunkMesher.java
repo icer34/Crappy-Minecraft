@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import game.blocks.BlockRegistry;
 import game.world.Chunk;
+import game.blocks.Block;
 
 import java.util.Map;
 
@@ -121,12 +122,12 @@ public class ChunkMesher {
         //             textureOverlayID - tintIdx - flags -> 10 - 3 - 19 = 32
 
         Block b = registry.blockFromID(blockID);
-        int textureID = b.getTextureID(face);
+        int textureID = b.getBaseTextureID(face);
         int ovrTextureID = -1;
-        if(b instanceof MultiTexturedBlock mt) ovrTextureID = mt.getOvrTextureID(face);
+        if(b.isMultitextured()) ovrTextureID = b.getOvrTextureID(face);
         int tintIdx = -1;
-        if(b instanceof GrassBlock) tintIdx = 0;
-        else if(b instanceof WaterBlock) tintIdx = 1;
+        if(b.name().equals("grass_block")) tintIdx = 0;
+        else if(b.name().equals("water_block")) tintIdx = 1;
         int flags = 0;
 
         for(int corner = 0; corner < 4; corner++) {

@@ -1,5 +1,6 @@
 package graphics;
 
+import game.blocks.Block;
 import utils.Window;
 import game.Player;
 import graphics.hud.HUD;
@@ -62,12 +63,12 @@ public class Renderer {
         //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
             for(int f : Faces.ALL) {
-                if(b instanceof MultiTexturedBlock mtb) {
-                    int ovrTextureID =  textureAtlas.insert(mtb.ovrTextureKey(f));
-                    mtb.setOvrTextureID(f, ovrTextureID);
+                if(b.isMultitextured()) {
+                    int ovrTextureID =  textureAtlas.insert(b.getOvrTextureKey(f));
+                    b.setOvrTextureID(f, ovrTextureID);
                 }
-                int baseTextureID = textureAtlas.insert(b.textureKey(f));
-                b.setTextureID(f, baseTextureID);
+                int baseTextureID = textureAtlas.insert(b.getBaseTextureKey(f));
+                b.setBaseTextureID(f, baseTextureID);
             }
         }
         textureAtlas.generateMipmaps();

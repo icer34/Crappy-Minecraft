@@ -51,7 +51,7 @@ public class TerrainGenerator {
                         blocks[idx] = blockRegistry.idFromName("grass_block");
                     }
 
-                    else if (y > h - 3) blocks[idx] = blockRegistry.idFromName("stone_block");
+                    else if (y > h - 3) blocks[idx] = blockRegistry.idFromName("dirt_block");
                     else blocks[idx] = blockRegistry.idFromName("stone_block");
                 }
 

@@ -3,6 +3,7 @@ package game.blocks;
 import game.world.World;
 import org.joml.Vector3i;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.function.BiConsumer;
 
@@ -11,16 +12,28 @@ public class BlockSettings {
 //    default settings
     String name = "default";
     int id = -1;
+
     boolean solid = true;
     boolean transparent = false;
     boolean multiTextured = false;
-    String[] baseTexturesKey = new String[6];
-    int[]  baseTexturesID = new int[6];
-    String[] ovrTexturesKey = new String[6];
-    int[] ovrTexturesID = new int[6];
+    boolean breakable = true;
+
+    String[] baseTexturesKey;
+    int[]  baseTexturesID;
+    String[] ovrTexturesKey;
+    int[] ovrTexturesID;
 
     public BlockSettings def() {
-        return new BlockSettings();
+        baseTexturesKey = new String[6];
+        Arrays.fill(baseTexturesKey, "");
+        baseTexturesID = new int[6];
+        Arrays.fill(baseTexturesID, -1);
+
+        ovrTexturesKey = new String[6];
+        Arrays.fill(ovrTexturesKey, "");
+        ovrTexturesID = new int[6];
+        Arrays.fill(ovrTexturesID, -1);
+        return this;
     }
 
     public BlockSettings name(String name) {
@@ -43,16 +56,13 @@ public class BlockSettings {
         return this;
     }
 
-    public int getBaseTextureID(int face) {
-        return baseTexturesID[face];
+    public BlockSettings breakable(boolean value) {
+        this.breakable = value;
+        return this;
     }
 
     public void setBaseTexturesID(int face, int id) {
         this.baseTexturesID[face] = id;
-    }
-
-    public int getOvrTextureID(int face) {
-        return ovrTexturesID[face];
     }
 
     public void setOvrTexturesID(int face, int id) {
@@ -64,8 +74,17 @@ public class BlockSettings {
         return this;
     }
 
-    public BlockSettings baseTexturesKey(String[] textures) {
-        this.baseTexturesKey = textures;
+    public BlockSettings baseTexturesKey(String ... textures) {
+        int l = textures.length;
+        if(l > 6) {
+            throw new RuntimeException("Cannot specify more than 6 textures for a block: " + name);
+        }
+
+        System.arraycopy(textures, 0, this.baseTexturesKey, 0, l);
+
+        for(int i = l; i < 6; i++) {
+            this.baseTexturesKey[i] = "";
+        }
         return this;
     }
 
@@ -75,8 +94,17 @@ public class BlockSettings {
         return this;
     }
 
-    public BlockSettings ovrTexturesKey(String[] textures) {
-        this.ovrTexturesKey = textures;
+    public BlockSettings ovrTexturesKey(String ... textures) {
+        int l = textures.length;
+        if(l > 6) {
+            throw new RuntimeException("Cannot specify more than 6 overlay textures for a block: " + name);
+        }
+
+        System.arraycopy(textures, 0, this.ovrTexturesKey, 0, l);
+
+        for(int i = l; i < 6; i++) {
+            this.ovrTexturesKey[i] = "";
+        }
         this.multiTextured = true;
         return this;
     }

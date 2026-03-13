@@ -43,16 +43,9 @@ public class World {
     //chunks currently being loaded
     Map<Long, Boolean> inFlight = new ConcurrentHashMap<>();
 
-    public World(long seed) {
+    public World(long seed, BlockRegistry registry) {
         //setup block registry
-        blockRegistry = new BlockRegistry();
-        //(scan all blocks, add them to the registry) -> JSON ? java files scan ? ...?
-        blockRegistry.insert(new AirBlock());
-        blockRegistry.insert(new StoneBlock());
-        blockRegistry.insert(new GrassBlock());
-        blockRegistry.insert(new WaterBlock());
-        blockRegistry.insert(new DirtBlock());
-
+        blockRegistry = registry;
         this.chunkMesher = new ChunkMesher(CHUNK_SIZE, MAX_HEIGHT, blockRegistry);
 
         this.terrainGenerator = new TerrainGenerator(seed, MAX_HEIGHT, CHUNK_SIZE, blockRegistry);

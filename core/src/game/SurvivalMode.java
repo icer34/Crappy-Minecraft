@@ -1,5 +1,6 @@
 package game;
 
+import game.blocks.Block;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;
@@ -51,8 +52,8 @@ public class SurvivalMode implements GameMode{
         // --- PLAYER BROKE BLOCK ---
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1) && rayCastResult.hit()) {
             Block b = world.getBlockAt(rayCastResult.targetPos());
-            if(b instanceof BreakableBlock bb)
-                bb.onBreak(world, rayCastResult.targetPos());
+            if(b.isBreakable())
+                b.onBreak(world, rayCastResult.targetPos());
         }
 
         // --- PLAYER PLACED BLOCK ---

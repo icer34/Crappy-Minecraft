@@ -1,5 +1,6 @@
 package game;
 
+import game.blocks.BlockRegistry;
 import main.IApplication;
 import graphics.Renderer;
 import graphics.hud.HUD;
@@ -25,6 +26,7 @@ public class Game implements IApplication {
     Player player;
 
     World world;
+    BlockRegistry registry;
 
     // FPS variables
     private int fpsCounter = 0;
@@ -53,12 +55,14 @@ public class Game implements IApplication {
 
     @Override
     public void init() {
-        window = new Window("Crappy Minecraft", 1600, 900, false);
+        window = new Window("Crappy Minecraft", 1600, 900, true);
         window.init(input = new Input());
 
-        world = new World(0);
+        registry = new BlockRegistry();
 
-        renderer = new Renderer(window, world.getBlockRegistry(), 80.0f, 0.001f, 1000.0f);
+        world = new World(0, registry);
+
+        renderer = new Renderer(window, registry, 80.0f, 0.001f, 1000.0f);
 
         player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f), 0.0f));
         playerManager = new PlayerManager();
