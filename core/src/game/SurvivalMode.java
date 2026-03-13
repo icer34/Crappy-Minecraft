@@ -52,8 +52,7 @@ public class SurvivalMode implements GameMode{
         // --- PLAYER BROKE BLOCK ---
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_1) && rayCastResult.hit()) {
             Block b = world.getBlockAt(rayCastResult.targetPos());
-            if(b.isBreakable())
-                b.onBreak(world, rayCastResult.targetPos());
+            b.onBreak(world, rayCastResult.targetPos());
         }
 
         // --- PLAYER PLACED BLOCK ---

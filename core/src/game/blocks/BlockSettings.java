@@ -18,21 +18,12 @@ public class BlockSettings {
     boolean multiTextured = false;
     boolean breakable = true;
 
-    String[] baseTexturesKey;
-    int[]  baseTexturesID;
-    String[] ovrTexturesKey;
-    int[] ovrTexturesID;
+    String[] baseTexturesKey = new String[6];
+    int[]  baseTexturesID = new int[6];
+    String[] ovrTexturesKey = new String[6];
+    int[] ovrTexturesID = new int[6];
 
     public BlockSettings def() {
-        baseTexturesKey = new String[6];
-        Arrays.fill(baseTexturesKey, "");
-        baseTexturesID = new int[6];
-        Arrays.fill(baseTexturesID, -1);
-
-        ovrTexturesKey = new String[6];
-        Arrays.fill(ovrTexturesKey, "");
-        ovrTexturesID = new int[6];
-        Arrays.fill(ovrTexturesID, -1);
         return this;
     }
 
@@ -117,7 +108,11 @@ public class BlockSettings {
         world.setBlock(this.name, pos);
     };
     BiConsumer<World, Vector3i> onBreak = (world, pos) -> {
-        world.breakBlock(pos);
+        if(!breakable) {
+            //do nothing if block is not breakable
+        } else {
+            world.breakBlock(pos);
+        }
     };
     BiConsumer<World, Vector3i> onInteract = (world, pos) -> {};
 

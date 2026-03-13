@@ -49,47 +49,47 @@ public class BlockRegistry {
         return IDRegistry.values();
     }
 
-//  =================
-//  BLOCK DEFINITIONS
-//  =================
-
+//  ===================================================
+//                  BLOCK DEFINITIONS
+//  ===================================================
     private static final Block AIR = new Block(
             new BlockSettings().def()
-                    .name("air_block")
-                    .solid(false)
-                    .transparent(true)
-                    .baseTextureKey("textures/particle/big_smoke_11.png")
+                               .name("air_block")
+                               .solid(false)
+                               .transparent(true)
+                               .baseTextureKey("textures/particle/big_smoke_11.png")
     );
 
     private static final Block DIRT = new Block(
             new BlockSettings().def()
-                    .name("dirt_block")
-                    .baseTextureKey("textures/block/dirt.png")
+                               .name("dirt_block")
+                               .baseTextureKey("textures/block/dirt.png")
     );
 
     private static final Block GRASS = new Block(
             new BlockSettings().def()
-                    .name("grass_block")
-                    .baseTextureKey("textures/block/dirt.png")
-                    .ovrTexturesKey("textures/block/grass_block_side_overlay.png",
-                                    "textures/block/grass_block_side_overlay.png",
-                                    "textures/block/grass_block_side_overlay.png",
-                                    "textures/block/grass_block_side_overlay.png",
-                                    "textures/block/grass_block_top.png")
+                               .name("grass_block")
+                               .baseTextureKey("textures/block/dirt.png")
+                               .ovrTexturesKey("textures/block/grass_block_side_overlay.png",
+                                               "textures/block/grass_block_side_overlay.png",
+                                               "textures/block/grass_block_side_overlay.png",
+                                               "textures/block/grass_block_side_overlay.png",
+                                               "textures/block/grass_block_top.png")
     );
 
     private static final Block STONE = new Block(
             new BlockSettings().def()
-                    .name("stone_block")
-                    .baseTextureKey("textures/block/stone.png")
+                               .name("stone_block")
+                               .baseTextureKey("textures/block/stone.png")
     );
 
     private static final Block WATER = new Block(
             new BlockSettings().def()
-                    .name("water_block")
-                    .baseTextureKey("textures/block/water_still.png")
-                    .solid(false)
+                               .name("water_block")
+                               .baseTextureKey("textures/block/water_still.png")
+                               .solid(false)
     );
 
     private static final List<Block> ALL = List.of(AIR, DIRT, GRASS, STONE, WATER);
+
 }
