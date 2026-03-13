@@ -1,6 +1,7 @@
 package game;
 
 import game.blocks.BlockRegistry;
+import game.items.ItemRegistry;
 import main.IApplication;
 import graphics.Renderer;
 import graphics.hud.HUD;
@@ -26,7 +27,8 @@ public class Game implements IApplication {
     Player player;
 
     World world;
-    BlockRegistry registry;
+    BlockRegistry blockRegistry;
+    ItemRegistry itemRegistry;
 
     // FPS variables
     private int fpsCounter = 0;
@@ -58,19 +60,22 @@ public class Game implements IApplication {
         window = new Window("Crappy Minecraft", 1600, 900, true);
         window.init(input = new Input());
 
-        registry = new BlockRegistry();
+        blockRegistry = new BlockRegistry();
+        itemRegistry = new ItemRegistry(blockRegistry);
 
-        world = new World(0, registry);
+        world = new World(0, blockRegistry);
 
-        renderer = new Renderer(window, registry, 80.0f, 0.001f, 1000.0f);
+        renderer = new Renderer(window, blockRegistry, 80.0f, 0.001f, 1000.0f);
 
         player = new Player(new Vector3f(0.0f, world.getGroundHeight(0.0f, 0.0f), 0.0f));
         playerManager = new PlayerManager();
-        playerManager.setMode(player, new SurvivalMode(world));
+        playerManager.setMode(player, new SurvivalMode(world, blockRegistry, itemRegistry));
+
+        player.giveItem(itemRegistry.itemFromName("stone"), 1);
 
         hud = new HUD(window);
 
-        gui = new GUI(window, renderer, player, playerManager, world, hud);
+        gui = new GUI(window, renderer, player, playerManager, world, hud, blockRegistry, itemRegistry);
 
         //background color
         glClearColor(.0f, .0f, .0f, 1f);

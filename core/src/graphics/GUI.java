@@ -1,6 +1,8 @@
 package graphics;
 
 import game.*;
+import game.blocks.BlockRegistry;
+import game.items.ItemRegistry;
 import graphics.hud.HUD;
 import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
@@ -26,6 +28,8 @@ public class GUI {
     TerrainGenerator terrainGenerator;
     RayCaster rayCaster;
     HUD hud;
+    BlockRegistry blockRegistry;
+    ItemRegistry itemRegistry;
 
     ImGuiImplGlfw imGuiGlfw;
     ImGuiImplGl3 imGuiGl3;
@@ -56,7 +60,7 @@ public class GUI {
     private float waterTransparency;
 
 
-    public GUI(Window window, Renderer renderer, Player player, PlayerManager playerManager, World world, HUD hud) {
+    public GUI(Window window, Renderer renderer, Player player, PlayerManager playerManager, World world, HUD hud, BlockRegistry br, ItemRegistry ir) {
         this.window = window;
         this.renderer = renderer;
         this.cam = player.getCam();
@@ -123,7 +127,7 @@ public class GUI {
 
         ImGui.text("Rendered chunks: " + renderer.getRenderedChunks());
 
-        ImGui.text("Selected block: " + player.getSelectedBlock());
+        //ImGui.text("Selected block: " + player.getSelectedBlock());
 
         Vector3f pos = player.getPos();
         String s = String.format("Player coords x: %.3f y: %.3f z: %.3f", pos.x, pos.y, pos.z);
@@ -197,7 +201,7 @@ public class GUI {
                 if (ImGui.selectable(gameModes[i], selected)) {
                     gameMode = i;
                     if(gameMode == 0) {
-                        playerManager.setMode(player, new SurvivalMode(world));
+                        playerManager.setMode(player, new SurvivalMode(world, blockRegistry, itemRegistry));
                     } else {
                         playerManager.setMode(player, new SpectatorMode(world));
                     }

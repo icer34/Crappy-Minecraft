@@ -52,14 +52,6 @@ public class BlockSettings {
         return this;
     }
 
-    public void setBaseTexturesID(int face, int id) {
-        this.baseTexturesID[face] = id;
-    }
-
-    public void setOvrTexturesID(int face, int id) {
-        this.ovrTexturesID[face] = id;
-    }
-
     public BlockSettings baseTextureKey(String texture) {
         Arrays.fill(baseTexturesKey, texture);
         return this;

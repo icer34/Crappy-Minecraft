@@ -44,7 +44,7 @@ public class Block {
     }
 
     public void setBaseTextureID(int face, int id) {
-        settings.setBaseTexturesID(face, id);
+        settings.baseTexturesID[face] = id;
     }
 
     public int getOvrTextureID(int face) {
@@ -52,7 +52,7 @@ public class Block {
     }
 
     public void setOvrTextureID(int face, int id) {
-        settings.setOvrTexturesID(face, id);
+        settings.ovrTexturesID[face] = id;
     }
 
     public String getBaseTextureKey(int face) {

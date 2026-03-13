@@ -1,6 +1,9 @@
 package game;
 
 import game.blocks.Block;
+import game.blocks.BlockRegistry;
+import game.items.Item;
+import game.items.ItemRegistry;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;
@@ -14,9 +17,13 @@ public class SurvivalMode implements GameMode{
 
     private World world;
     private RayCaster rayCaster;
+    private BlockRegistry bLockRegistry;
+    private ItemRegistry itemRegistry;
 
-    public SurvivalMode(World world) {
+    public SurvivalMode(World world, BlockRegistry bLockRegistry, ItemRegistry itemRegistry) {
         this.world = world;
+        this.bLockRegistry = bLockRegistry;
+        this.itemRegistry = itemRegistry;
         this.rayCaster = new RayCaster(world);
     }
 
@@ -56,21 +63,22 @@ public class SurvivalMode implements GameMode{
         }
 
         // --- PLAYER PLACED BLOCK ---
+        //TODO: change this logic to use items (place if block item or use if normal item)
         if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_2) && rayCastResult.hit()) {
             Vector3i targetPos = rayCastResult.targetPos();
             targetPos.add(rayCastResult.targetNorm());
 
             if(!isPlacementValid(player, targetPos)) return;
 
-            Block b = world.getBlock(player.getSelectedBlock());
-            b.onPlacement(world, targetPos);
+            Item i = itemRegistry.itemFromID(player.getSelectedItemID());
+            i.onUse(world, targetPos);
         }
-
-        // --- PLAYER SELECTED BLOCK ---
-        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_3) && rayCastResult.hit()) {
-            Block b = world.getBlockAt(rayCastResult.targetPos());
-            player.setSelectedBlock(b.name());
-        }
+//          TODO
+//        // --- PLAYER SELECTED BLOCK ---
+//        if(input.consumeButtonPress(GLFW_MOUSE_BUTTON_3) && rayCastResult.hit()) {
+//            Block b = world.getBlockAt(rayCastResult.targetPos());
+//            player.setSelectedBlock(b.name());
+//        }
     }
 
     private Vector3f processPlayerMovement(Player player, Input input, float dt) {

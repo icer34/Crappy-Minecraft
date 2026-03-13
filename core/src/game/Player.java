@@ -1,5 +1,6 @@
 package game;
 
+import game.items.Item;
 import graphics.Camera;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
@@ -16,9 +17,10 @@ public class Player {
     private Camera cam;
     private boolean freeCam;
 
-    private float reach;
-    private String selectedBlock;
+    private int selectedSlot;
+    private Inventory inventory;
 
+    private float reach;
     private float walkSpeed;
     private float flySpeed;
     private float jumpVelocity;
@@ -36,7 +38,8 @@ public class Player {
         this.gravity = -15f;
         this.jumpVelocity = 6.0f;
         this.reach = 4.0f;
-        this.selectedBlock = "stone_block";
+        this.selectedSlot = 0;
+        this.inventory = new Inventory();
     }
 
     /*
@@ -205,9 +208,11 @@ public class Player {
         this.reach = reach;
     }
 
-    public String getSelectedBlock() {
-        return selectedBlock;
+    public int getSelectedItemID() {
+        return inventory.getItemID(selectedSlot);
     }
 
-    public void setSelectedBlock(String name) {this.selectedBlock = name;}
+    public void giveItem(Item item, int count) {
+        inventory.put(item, count, 0);
+    }
 }
