@@ -32,7 +32,7 @@ public class BlockRegistry {
 
     public int idFromName(String name) {
         if(!nameRegistry.containsKey(name)) {
-            System.out.println("You can't get the id of an unregistered block");
+            System.out.println("You can't get the id of an unregistered block: " + name);
             return -1;
         }
         return nameRegistry.get(name);
@@ -45,4 +45,9 @@ public class BlockRegistry {
     public Collection<Block> getBlocks() {
         return IDRegistry.values();
     }
+
+//    =================
+//    BLOCK DEFINITIONS
+//    =================
+    //todo
 }

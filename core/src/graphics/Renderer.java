@@ -1,7 +1,5 @@
 package graphics;
 
-import game.blocks.Block;
-import game.blocks.MultiTexturedBlock;
 import utils.Window;
 import game.Player;
 import graphics.hud.HUD;

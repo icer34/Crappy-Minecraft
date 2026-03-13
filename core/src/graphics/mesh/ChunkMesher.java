@@ -1,9 +1,5 @@
 package graphics.mesh;
 
-import game.blocks.Block;
-import game.blocks.GrassBlock;
-import game.blocks.MultiTexturedBlock;
-import game.blocks.WaterBlock;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import game.blocks.BlockRegistry;

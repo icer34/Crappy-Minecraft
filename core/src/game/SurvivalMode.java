@@ -1,7 +1,5 @@
 package game;
 
-import game.blocks.Block;
-import game.blocks.BreakableBlock;
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 import utils.Input;

@@ -1,61 +1,50 @@
 package game.blocks;
 
-import org.joml.Vector3i;
-import game.world.World;
+public class Block {
 
-public abstract class Block implements IBlock {
-    protected final String name;
-    protected int id;
-    protected int[] textureID = new int[6];
-    protected final boolean solid;
-    protected final boolean transparent;
+    private BlockSettings settings;
 
-    protected Block(String name, boolean solid, boolean transparent) {
-        this.name = name;
-        this.solid = solid;
-        this.transparent = transparent;
+    public Block(BlockSettings settings) {
+        this.settings = settings;
     }
 
-    @Override
     public String name() {
-        return name;
+        return settings.name;
     }
 
-    @Override
     public int getID() {
-        return id;
+        return settings.id;
     }
 
-    @Override
     public void setID(int id) {
-        this.id = id;
+        settings.id(id);
     }
 
-    @Override
     public boolean isSolid() {
-        return solid;
+        return settings.solid;
     }
 
-    @Override
     public boolean isTransparent() {
-        return transparent;
+        return settings.transparent;
     }
 
-    @Override
-    public int getTextureID(int face) {
-        return textureID[face];
+    public boolean isMultitextured() {
+        return settings.multiTextured;
     }
 
-    @Override
-    public void setTextureID(int face, int id) {
-        textureID[face] = id;
+    public int getBaseTextureID(int face) {
+        return settings.getBaseTextureID(face);
     }
 
-    @Override
-    public void onPlacement(World world, Vector3i wPos) {
-        world.setBlock(name, wPos);
+    public void setBaseTextureID(int face, int id) {
+        settings.setBaseTexturesID(face, id);
     }
 
-    @Override
-    public abstract String textureKey(int face);
+    public int getOvrTextureID(int face) {
+        return settings.getOvrTextureID(face);
+    }
+
+    public void setOvrTextureID(int face, int id) {
+        settings.setOvrTexturesID(face, id);
+    }
 }
