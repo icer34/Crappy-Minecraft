@@ -23,7 +23,7 @@ public class ItemRegistry {
     public ItemRegistry(BlockRegistry blockRegistry) {
         for (Item i : ALL) {
             if (IDRegistry.containsValue(i))
-                throw new RuntimeException("this block already exists in the IDRegistry: " + i.name());
+                throw new RuntimeException("this item already exists in the IDRegistry: " + i.name());
             int id = ID.incrementAndGet();
             IDRegistry.put(id, i);
             nameRegistry.put(i.name(), id);

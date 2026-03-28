@@ -66,4 +66,23 @@ public class HUD {
     public float getScale() {
         return scale;
     }
+
+    public int getHotbarSlotSize() {
+        for(HUDElement e : elements) {
+            if(e instanceof Hotbar) {
+                return ((Hotbar) e).getSlotSize();
+            }
+        }
+        return 0;
+    }
+
+    public int[][] getHotbarSlotCenters() {
+        for(HUDElement e : elements) {
+            if(e instanceof Hotbar) {
+                return ((Hotbar) e).getSlotCenters();
+            }
+        }
+
+        return new int[][] {};
+    }
 }

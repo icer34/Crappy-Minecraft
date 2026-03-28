@@ -208,6 +208,10 @@ public class Player {
         this.reach = reach;
     }
 
+    public SlotData[] getHotbarItems() {
+        return inventory.getHotbarData();
+    }
+
     public int getSelectedItemID() {
         return inventory.getItemID(selectedSlot);
     }

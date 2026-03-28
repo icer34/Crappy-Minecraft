@@ -1,6 +1,7 @@
 package graphics;
 
 import game.blocks.Block;
+import game.items.ItemRegistry;
 import utils.Window;
 import game.Player;
 import graphics.hud.HUD;
@@ -23,6 +24,7 @@ public class Renderer {
 
     private final Window window;
     private final BlockRegistry blockRegistry;
+    private final ItemRegistry itemRegistry;
 
     private final TextureAtlas textureAtlas;
     private final TintTexture tintTexture;
@@ -41,6 +43,8 @@ public class Renderer {
 
     private Frustum frustum = new Frustum();
 
+    private ItemRenderer itemRenderer;
+
 
     private float zNear, zFar;
     private float fov;
@@ -51,14 +55,16 @@ public class Renderer {
     private float waterFogDensity = 0.12f;
     private float waterTransparency = 0.6f;
 
-    public Renderer(Window window, BlockRegistry registry, float fov, float zNear, float zFar) {
+    public Renderer(Window window, BlockRegistry bRegistry, ItemRegistry iRegistry, float fov, float zNear, float zFar) {
         this.window = window;
-        this.blockRegistry = registry;
+        this.blockRegistry = bRegistry;
+        this.itemRegistry = iRegistry;
         this.fov = fov;
         this.zNear = zNear;
         this.zFar = zFar;
         this.textureAtlas = new TextureAtlas(16);
         this.playerModelMesh.update(ModelParser.parseOBJ("models/playerModel.obj"));
+        this.itemRenderer = new ItemRenderer(itemRegistry);
 
         //set up the texture atlas
         for(Block b : blockRegistry.getBlocks()) {
@@ -241,6 +247,7 @@ public class Renderer {
                           viewMatrix, projMatrix);
 
         hud.draw();
+        itemRenderer.renderHotbar(player.getHotbarItems(), hud.getHotbarSlotSize(), hud.getHotbarSlotCenters());
     }
 
     private ShaderProgram createShaderProgram(String name, String vertPath, String fragPath, String ... extraPaths) {

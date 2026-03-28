@@ -4,7 +4,6 @@ import game.world.World;
 import org.joml.Vector3i;
 
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public class ItemSettings {
     //default
